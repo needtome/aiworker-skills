@@ -65,6 +65,11 @@ Tools: `get_account` (chats, personas, employees, tasks with ids), `guide` (the 
 before proposing), `lookup` (what tasks did with given links), `task_status`, `propose_changes`, `pending_changes`,
 `apply_changes`, `discard_changes`, `export`, `import`.
 
+Without MCP but with the API key, the same is plain REST (`Authorization: Bearer <key>`, base
+`https://kra.name/app/api/v1`, reference https://kra.name/app/api/docs): `GET /account`, `GET /tasks/{id}`,
+`POST /lookup`, `GET /guide`, `POST /changes` → `POST /changes/apply` (or `DELETE /changes`), `GET /export`,
+`POST /import` (dry run unless `"dry_run": false`).
+
 Always two steps, like the panel's setup wizard: `propose_changes` checks the actions and keeps the valid ones; show
 the owner the returned summaries and refusals; call `apply_changes` **only after the owner agrees**. For a set of new
 items use `import` with `dry_run: true` first, then `dry_run: false` after the owner agrees.
