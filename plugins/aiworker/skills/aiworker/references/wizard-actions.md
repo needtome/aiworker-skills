@@ -33,6 +33,9 @@ on apply.
 - `automation_run` — Запустить задание сейчас
 - `automation_pause` — Поставить задание на паузу
 - `automation_secret_set` — Сохранить ключ API, который владелец прислал в чат, в «Ключи доступа» задания
+- `agent_route_create` — Создать маршрут ИИ-агента: события аккаунта сразу в Claude Code или Codex владельца
+- `agent_route_update` — Изменить маршрут ИИ-агента
+- `agent_route_pause` — Поставить маршрут ИИ-агента на паузу
 
 The fields of each action, the payload JSON of automation_* / audience_collect and the rules come from the `guide`
 tool of the connected account — read it before proposing.

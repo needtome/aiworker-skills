@@ -460,7 +460,7 @@
                                     },
                                     "program": {
                                         "type": "object",
-                                        "description": "optional scenario: {start_url?, steps:[{op, …}]}; ops: goto, back, reload, check_auth, page_state, dismiss, click, click_text, type, set_value, clear, select, check, press, hover, mouse, scroll, wait, wait_until, get, extract, extract_list, feed, fetch, api, json_list, storage_get, open_tab, close_tab, download, upload, screenshot, tg_join, tg_fetch, tg_search, tg_send, tg_discover, add_target, audience_fetch, for_each, if, repeat, break, try, call, jump, pause, stop, set, calc, regex, date, match, filter, dedupe, push, keep, decide, ai, save, notify. Keys only as {{secret.NAME}}. Without a program the AI writes it.",
+                                        "description": "optional scenario: {start_url?, steps:[{op, …}]}; ops: goto, back, reload, check_auth, page_state, dismiss, click, click_text, type, set_value, clear, select, check, press, hover, mouse, scroll, wait, wait_until, get, extract, extract_list, feed, fetch, api, json_list, storage_get, open_tab, close_tab, download, upload, screenshot, tg_join, tg_fetch, tg_search, tg_send, tg_discover, add_target, audience_fetch, for_each, if, repeat, break, try, call, jump, pause, stop, set, calc, regex, date, match, filter, dedupe, push, keep, decide, ai, save, notify, agent. Keys only as {{secret.NAME}}. Without a program the AI writes it.",
                                         "properties": {
                                             "start_url": {
                                                 "type": "string"
@@ -535,7 +535,8 @@
                                                                 "decide",
                                                                 "ai",
                                                                 "save",
-                                                                "notify"
+                                                                "notify",
+                                                                "agent"
                                                             ]
                                                         }
                                                     }

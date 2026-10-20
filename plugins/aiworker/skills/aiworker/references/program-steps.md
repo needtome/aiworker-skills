@@ -838,3 +838,17 @@ A short notification to you in the panel and in Telegram, with substitutions.
 ```json
 {"op":"notify","text":"Готово, собрано {{all|count}}"}
 ```
+
+### `agent` — Hand to AI agent (kind: common)
+
+Hands the element (or a text) to your own Claude Code or Codex through a route from «AI agents»: the agent gets the event at once and follows the route's instruction. Nothing is sent to sites or people — only data to your agent. The route is given by name; the events go when the run ends.
+
+| field | type | meaning |
+|---|---|---|
+| `route` | s | Route (name from «AI agents») — e.g. `orders` |
+| `text` | t | Text for the agent (optional) — e.g. `New order: {{item.title}}` |
+| `save_item` | s | What to hand over (a variable, optional) — e.g. `item` |
+
+```json
+{"op":"agent","route":"orders","text":"Новый заказ: {{item.title}}","item":"item"}
+```

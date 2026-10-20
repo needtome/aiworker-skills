@@ -158,8 +158,48 @@ Body: `{"text":"string","takeover":"boolean"}`, required: text
 
 Подпись каждого вебхука: заголовок X-Signature-Timestamp (unix-время, секунды) и X-AIWorker-Signature-V2 = "sha256=" + HMAC-SHA256(X-Signature-Timestamp + "." + тело запроса) секретом из панели. Сравнивайте подпись за постоянное время и отклоняйте запрос, если метка времени отличается от текущего времени больше чем на 5 минут: так перехваченный запрос нельзя повторить. Устаревший заголовок X-AIWorker-Signature (HMAC только тела, без метки времени) пока отправляется для совместимости и будет убран.
 
+## ИИ-агенты
+
+События аккаунта для вашего Claude Code или Codex (ADR 102). Слушатель aiworker-listen.mjs на вашем компьютере ждёт сигнал (long-poll OMS по адресу wake.url маршрута) и забирает события этим методом; агент отмечает событие через MCP agent_ack или POST /agent/events/{id}/ack. Публичный адрес маршрута для CRM — в панели, «ИИ-агенты».
+
+### `GET /agent/routes`
+
+Маршруты ИИ-агентов: агент, режим сессии, инструкция, сколько ждёт, адрес сигнала для слушателя (wake.url)
+
+### `GET /agent/events`
+
+Забрать ждущие события маршрута (помечаются «передано агенту»): данные, агент, сессия, готовый промпт
+- `route` (query) — имя маршрута; без него — все активные
+- `after` (query) — только события с id больше
+- `limit` (query)
+
+### `POST /agent/events`
+
+Отправить событие в маршрут из своего скрипта (источник api)
+
+Body: `{"route":"string","title":"string","payload":"object"}`, required: route, payload
+
+### `GET /agent/events/recent`
+
+Последние события и их статус (ничего не помечается)
+- `route` (query)
+- `status` (query)
+- `limit` (query)
+
+### `GET /agent/events/{id}`
+
+Одно событие с данными и промптом
+- `id` (path, required)
+
+### `POST /agent/events/{id}/ack`
+
+Отметить событие: обработано или нет, и что сделано
+- `id` (path, required)
+
+Body: `{"status":"string","result":"string"}`, required: status
+
 ## MCP server
 
 `POST https://kra.name/app/api/mcp` (Streamable HTTP, JSON answers), the same key. Tools: get_account, guide, lookup,
-task_status, propose_changes, pending_changes, apply_changes, discard_changes, export, import — the same as the REST
-methods above. At most 10 messages per request, 120 tool calls and 10 imports a minute.
+task_status, propose_changes, pending_changes, apply_changes, discard_changes, export, import, agent_routes, agent_events,
+agent_ack — the same as the REST methods above. At most 10 messages per request, 120 tool calls and 10 imports a minute.

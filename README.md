@@ -124,12 +124,31 @@ Use either this connector or the Claude Code plugin, not both on one computer.
   - run, pause or switch on a task; start or pause a contact collection;
   - edit a chat's greeting, quick questions, FAQ, look and knowledge sources;
   - edit persona and employee instructions;
-  - store an API key a task needs.
+  - store an API key a task needs;
+  - create, change or pause an AI agent route, see its events and mark them done.
 - Export settings to a file and import a file (a check first, then creation).
 
 Every change is proposed first and applied only by a separate call after you agree.
 
 The same is available as a plain REST API: https://kra.name/app/api/docs.
+
+## Events straight to your Claude or Codex
+
+MCP cannot wake an idle Claude Code or Codex. AI Worker's **AI agents** do: you create a route in the panel
+(*AI employee tasks → AI agents*) — which agent (Claude Code or Codex), how to wake it and what to do with each event —
+and a small listener on your computer (`plugins/aiworker/skills/aiworker/scripts/aiworker-listen.mjs`, Node 18+, no
+dependencies) brings each event to the agent within seconds.
+
+- Events come from the route's own address (your CRM, shop or form posts JSON to it), from a task step
+  *Hand to AI agent*, or from `POST /api/v1/agent/events`.
+- **Open session:** tell your Claude Code "listen to AI Worker events of route orders". It starts the listener with its
+  Monitor tool; every event wakes that session, and the agent marks the event done itself.
+- **In the background:** tell Claude Code or Codex "install the AI Worker background listener for route orders". It sets
+  the listener to start with the computer (launchd on macOS, systemd on Linux, Task Scheduler on Windows); for each event
+  the listener runs the agent without a window — a given session (`resume`) or a new run (`new`) — and reports the result.
+  Don't resume in the background a session you have open in an app at the same time.
+- Only a content-free "there is an event" signal goes through the AI Worker server; the event itself is fetched with your
+  API key. The key is never put on a command line. Events are kept for 30 days.
 
 ## Examples of requests
 
@@ -274,12 +293,31 @@ MCP-сервер:
   - запустить, поставить на паузу или включить задание; запустить или остановить сбор контактов;
   - поправить приветствие, быстрые вопросы, FAQ, вид и источники знаний чата;
   - изменить инструкции личности и ИИ-сотрудника;
-  - сохранить ключ API, нужный заданию.
+  - сохранить ключ API, нужный заданию;
+  - создать, изменить или поставить на паузу маршрут ИИ-агента, смотреть его события и отмечать их.
 - Выгружать настройки в файл и загружать файл (сначала проверка, потом создание).
 
 Каждое изменение сначала только предлагается и применяется отдельной командой после вашего согласия.
 
 То же доступно как обычный REST API: https://kra.name/app/api/docs.
+
+## События сразу в ваш Claude или Codex
+
+MCP не может разбудить Claude Code или Codex, который ничего не делает. Это умеют **ИИ-агенты** AI Worker: вы создаёте
+маршрут в панели (*Задания ИИ-сотрудникам → ИИ-агенты*) — какой агент (Claude Code или Codex), как его будить и что
+делать с каждым событием, — а маленький слушатель на вашем компьютере (`plugins/aiworker/skills/aiworker/scripts/aiworker-listen.mjs`,
+Node 18+, без зависимостей) за секунды доставляет агенту каждое событие.
+
+- События приходят на собственный адрес маршрута (на него шлёт JSON ваша CRM, магазин или форма), из шага задания
+  «Передать ИИ-агенту» или через `POST /api/v1/agent/events`.
+- **Открытая сессия:** скажите вашему Claude Code «слушай события AI Worker маршрута orders». Он запустит слушатель
+  инструментом Monitor; каждое событие разбудит эту сессию, а агент сам отметит, что событие обработано.
+- **В фоне:** скажите Claude Code или Codex «установи фоновый слушатель AI Worker для маршрута orders». Он поставит
+  слушатель в автозапуск (launchd на macOS, systemd на Linux, Планировщик заданий на Windows); на каждое событие слушатель
+  запускает агента без окна — заданную сессию (`resume`) или новый запуск (`new`) — и сам отправляет результат. Не
+  продолжайте в фоне сессию, которая в это же время открыта в приложении.
+- Через сервер AI Worker идёт только сигнал «есть событие» без содержимого; само событие слушатель забирает по вашему
+  API-ключу. Ключ никогда не попадает в командную строку. События хранятся 30 дней.
 
 ## Примеры просьб
 
