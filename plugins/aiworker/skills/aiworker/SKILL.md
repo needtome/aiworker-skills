@@ -9,6 +9,13 @@ AI Worker rents out AI employees: they talk to customers in messengers and a web
 and in Telegram groups ("tasks"). The owner sets things up in the panel at https://kra.name/app/panel. You help the
 owner do that from their own Codex or Claude.
 
+What an AI employee can do (so you know what to offer): collect data from websites and Telegram channels; do anything
+on a website except signing in (the owner signs in once, the employee keeps that session); run tasks in the owner's own
+Edge/Chrome/Firefox through the AI Worker extension (`run_on: "client_browser"`); write on WhatsApp, Telegram, imo and
+MAX, including first; email; hold conversations with customers there, by email and in the website chat; send results by
+email, Telegram, WhatsApp or Slack; call any API; work with the owner's Google Sheets and Docs; run every N minutes or
+every day at an exact time (`daily_at`).
+
 Two ways to work — pick by what is available:
 
 1. **Connected (MCP).** If tools named `get_account`, `guide`, `propose_changes`, `apply_changes`, `import` are available
