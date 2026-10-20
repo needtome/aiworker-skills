@@ -49,6 +49,13 @@ the old one — or use connected mode, which changes things in place.
 The account is an MCP server: `https://kra.name/app/api/mcp`, header `Authorization: Bearer <API key>` (panel →
 Настройки → Интеграции; the API is on the Business plan and above). Setup:
 
+If the owner says the key is in a file (usually `~/Downloads/aiworker-key.txt` from «Скачать файлом» in the panel),
+never print it, `cat` it into your answer or paste it into a command line you show: move it with the shell, e.g.
+`printf '\nexport AIWORKER_API_KEY="%s"\n' "$(tr -d '\r\n' < ~/Downloads/aiworker-key.txt)" >> ~/.zshrc` (bash: `~/.bashrc`;
+Windows PowerShell: `setx AIWORKER_API_KEY (Get-Content $HOME\Downloads\aiworker-key.txt -Raw).Trim()`), check that the
+variable is set in a new shell without echoing it (`[ -n "$AIWORKER_API_KEY" ] && echo set`), then delete the file and
+tell the owner to restart Codex or Claude Code.
+
 - Claude Code plugin (this skill + the MCP server): `/plugin marketplace add needtome/aiworker-skills`, then
   `/plugin install aiworker@aiworker-skills`; the key comes from the environment variable `AIWORKER_API_KEY`.
 - Claude Code, MCP only: `claude mcp add --transport http aiworker https://kra.name/app/api/mcp --header "Authorization: Bearer $AIWORKER_API_KEY"`

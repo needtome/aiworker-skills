@@ -21,31 +21,34 @@ Two ways to work:
 2. **Connected (MCP).** The AI works with your account like the panel's setup wizard: it sees your chats and tasks,
    proposes changes and applies them only after you agree. Needs an API key (Business plan and above).
 
-## Before you start: the API key
-
-Needed for the MCP server (the settings-file way works without it).
-
-1. Open [Settings → Integrations](https://kra.name/app/panel/settings?section=integrations&lang=en) in the panel
-   and issue a key.
-2. Put it into the environment variable `AIWORKER_API_KEY`, for example in `~/.zshrc`:
-   ```bash
-   export AIWORKER_API_KEY=aiw_live_...
-   ```
-3. Restart the terminal (and Codex or Claude Code).
-
 ## Install
 
-### The easy way: ask your AI
+### The easy way: let your AI do it
 
-Write to your Codex or Claude Code:
+1. Open [Settings → Integrations](https://kra.name/app/panel/settings?section=integrations&lang=en) in the panel and
+   press «Issue key». The key is shown once: press «Download as file» — `aiworker-key.txt` appears in Downloads.
+2. Send this to your Codex or Claude Code:
 
-> Install the AI Worker MCP server and the aiworker skill from the repository https://github.com/needtome/aiworker-skills.
-> The API key is in the environment variable AIWORKER_API_KEY.
+   > Install the AI Worker MCP server and the aiworker skill from the repository https://github.com/needtome/aiworker-skills.
+   > The API key is in the file ~/Downloads/aiworker-key.txt: move it into the environment variable AIWORKER_API_KEY
+   > without showing the key on screen, then delete that file.
 
-Only the skill:
+3. Restart Codex or Claude Code when it asks.
+
+Only the skill (no key needed):
 
 > Install the aiworker skill from the repository https://github.com/needtome/aiworker-skills — the folder
 > plugins/aiworker/skills/aiworker.
+
+### Storing the key yourself
+
+Replace `your-key` with the key from the panel and run one command, then reopen the terminal, Codex or Claude Code.
+
+- Mac (Terminal app): `echo 'export AIWORKER_API_KEY="your-key"' >> ~/.zshrc`
+- Windows (PowerShell): `setx AIWORKER_API_KEY "your-key"`
+- Linux: `echo 'export AIWORKER_API_KEY="your-key"' >> ~/.bashrc`
+
+Do not paste the key into the chat with the AI and do not keep it in notes or shared documents.
 
 ### Claude Code by hand — the plugin (skill + MCP)
 
@@ -151,31 +154,35 @@ Codex или Claude настраивать аккаунт AI Worker по ваш�
 2. **Подключение (MCP).** ИИ работает с аккаунтом, как мастер настройки панели: видит чаты и задания, предлагает
    изменения и применяет их только после вашего согласия. Нужен API-ключ (с тарифа «Бизнес»).
 
-## Сначала: API-ключ
-
-Нужен для MCP-сервера (способ с файлом настроек работает и без него).
-
-1. Откройте в панели [«Настройки → Интеграции»](https://kra.name/app/panel/settings?section=integrations&lang=ru)
-   и выпустите ключ.
-2. Положите его в переменную окружения `AIWORKER_API_KEY`, например в `~/.zshrc`:
-   ```bash
-   export AIWORKER_API_KEY=aiw_live_...
-   ```
-3. Перезапустите терминал (и Codex или Claude Code).
-
 ## Установка
 
-### Проще всего: попросите ваш ИИ
+### Проще всего: пусть ИИ всё сделает
 
-Напишите вашему Codex или Claude Code:
+1. Откройте в панели [«Настройки → Интеграции»](https://kra.name/app/panel/settings?section=integrations&lang=ru) и
+   нажмите «Выпустить ключ». Ключ показывается один раз: нажмите «Скачать файлом» — в «Загрузках» появится
+   `aiworker-key.txt`.
+2. Отправьте вашему Codex или Claude Code:
 
-> Установи MCP-сервер AI Worker и скил aiworker из репозитория https://github.com/needtome/aiworker-skills.
-> API-ключ — в переменной окружения AIWORKER_API_KEY.
+   > Установи MCP-сервер AI Worker и скил aiworker из репозитория https://github.com/needtome/aiworker-skills.
+   > API-ключ лежит в файле ~/Downloads/aiworker-key.txt: перенеси его в переменную окружения AIWORKER_API_KEY,
+   > не показывая ключ на экране, а потом удали этот файл.
 
-Только скил:
+3. Перезапустите Codex или Claude Code, когда он попросит.
+
+Только скил (ключ не нужен):
 
 > Установи скил aiworker из репозитория https://github.com/needtome/aiworker-skills — папка
 > plugins/aiworker/skills/aiworker.
+
+### Сохранить ключ самому
+
+Замените `ваш-ключ` на ключ из панели, выполните одну команду и откройте заново терминал, Codex или Claude Code.
+
+- Mac (программа «Терминал»): `echo 'export AIWORKER_API_KEY="ваш-ключ"' >> ~/.zshrc`
+- Windows (PowerShell): `setx AIWORKER_API_KEY "ваш-ключ"`
+- Linux: `echo 'export AIWORKER_API_KEY="ваш-ключ"' >> ~/.bashrc`
+
+Не вставляйте ключ прямо в чат с ИИ и не храните его в заметках или общих документах.
 
 ### Claude Code вручную — плагин (скил + MCP)
 
