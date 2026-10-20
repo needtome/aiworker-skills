@@ -36,9 +36,9 @@ Workflow:
    the owner asked for an exact scenario: AI Worker's own AI opens the sites in the employee's browser, writes the
    scenario and shows it to the owner. Write a program only from `references/program-steps.md`; wrong selectors fail.
 3. Check it: valid JSON, `format` is `aiworker.bundle/1`, every `ref` unique, every `*_ref` points to an item of the file.
-4. Give the owner the file (save it as `aiworker-<what>.json`) and the import steps above. Tell him what to check after
-   the import: tasks with a program wait in «на проверке» until he switches them on; keys from `secret_names` are
-   entered on the task page; a contact collection is paused until he presses «Продолжить сбор».
+4. Give the owner the file (save it as `aiworker-<what>.json`) and the import steps above. In the panel the import starts
+   everything by default («Сразу запустить»): tasks run (one without a program once AI Worker has written it), contact
+   collections start; keys from `secret_names` are entered on the task page.
 
 Import only creates new items (a taken name gets " (2)"); it never changes existing ones. To change an existing task
 from a file, the owner exports it («Экспорт» on the task), you edit the file, he imports it as a new task and archives
@@ -72,7 +72,11 @@ Without MCP but with the API key, the same is plain REST (`Authorization: Bearer
 
 Always two steps, like the panel's setup wizard: `propose_changes` checks the actions and keeps the valid ones; show
 the owner the returned summaries and refusals; call `apply_changes` **only after the owner agrees**. For a set of new
-items use `import` with `dry_run: true` first, then `dry_run: false` after the owner agrees.
+items use `import` with `dry_run: true` first, then `dry_run: false` after the owner agrees — this creates **and
+starts** them (`activate`, default true: tasks run, collections start, «auto» mode as in the file; `activate: false`
+leaves them for the owner). Run, switch on or pause a task: `automation_run`, `automation_activate`,
+`automation_pause`; start or pause a contact collection: `audience_start`, `audience_pause` (ids in
+`get_account().audiences`).
 
 ## Working with tasks
 

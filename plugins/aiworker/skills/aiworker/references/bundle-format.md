@@ -45,8 +45,9 @@
 | `manual_program` | bool | the program is hand-made: AI Worker's AI never rewrites it |
 | `secret_names` | string[] | names of keys the program uses as `{{secret.NAME}}`; the owner enters values after import |
 
-After import: no `program` → AI Worker's AI explores the sites and writes the scenario (the owner gets it for review);
-with `program` → status «на проверке» until the owner switches the task on.
+After import, started (the default through MCP and the API, «Сразу запустить» in the panel): with `program` the task
+is switched on and runs; without it AI Worker's AI explores the sites, writes the scenario and runs the task. Not started
+(`activate: false`): a task with `program` waits «на проверке», `mode: auto` comes in as `draft`.
 
 ## kind: web_chat — a chat widget for a site
 
@@ -81,7 +82,7 @@ talks, what it may and may not say — e.g. "do not name prices that are not in 
 | `sheet` | `sheet_url` (public Google Sheet), `sheet_tab`, `refresh` (`daily`/`hourly`), `filter_col`, `filter_op`, `filter_val` |
 | `url` | `url` (CSV/JSON), `refresh`, `field_phone`, `field_name` |
 
-Imported paused; the owner starts it («Продолжить сбор»). CSV files are not carried.
+Started on import (or paused with `activate: false`, then `audience_start`). CSV files are not carried.
 
 ## kind: scenario — how an AI employee talks in dialogs (messengers)
 

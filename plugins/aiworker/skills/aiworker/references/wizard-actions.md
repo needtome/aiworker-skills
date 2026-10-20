@@ -26,6 +26,8 @@ on apply.
 - `automation_targets_add` — Добавить сайты или группы в задание
 - `automation_targets_remove` — Убрать сайты или группы из задания
 - `audience_collect` — Собрать в интернете контакты или Telegram-каналы (аудитория)
+- `audience_start` — Запустить или продолжить сбор контактов (аудитория из context.audiences)
+- `audience_pause` — Поставить сбор контактов на паузу
 - `feature_request` — Оставить заявку разработчикам на функционал, которого пока нет
 - `automation_activate` — Включить задание после проверки сценария
 - `automation_run` — Запустить задание сейчас
