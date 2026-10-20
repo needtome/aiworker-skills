@@ -13,9 +13,9 @@ AI Worker account from a plain description.
   works with that session from then on.
 - Run in your own browser: dedicate an Edge, Chrome or Firefox browser (or one of its profiles) on your computer with
   the AI Worker extension, and the jobs run there, with your logins and your IP.
-- Message people on WhatsApp, Telegram, imo and MAX — including writing first.
+- Message people on WhatsApp, Telegram, imo, MAX and Slack — including writing first.
 - Send emails.
-- Hold conversations and answer customers' questions on WhatsApp, Telegram, imo, MAX, by email and in the chat on your
+- Hold conversations and answer customers' questions on WhatsApp, Telegram, imo, MAX, Slack, by email and in the chat on your
   website.
 - Send you the results by email, Telegram, WhatsApp or Slack.
 - Work with any API, and with your Google Sheets and Docs once you connect them.
@@ -163,9 +163,9 @@ Codex или Claude настраивать аккаунт AI Worker по ваш�
   ИИ-сотрудник работает с этим входом.
 - Работают в вашем браузере: выделите Edge, Chrome или Firefox (или один из его профилей) на своём компьютере с
   расширением AI Worker — задания будут выполняться в нём, с вашими входами и вашим IP.
-- Пишут в WhatsApp, Telegram, imo и MAX — в том числе первыми.
+- Пишут в WhatsApp, Telegram, imo, MAX и Slack — в том числе первыми.
 - Пишут письма по email.
-- Ведут переписку и отвечают на вопросы клиентов в WhatsApp, Telegram, imo, MAX, по email и в онлайн-чате на сайте.
+- Ведут переписку и отвечают на вопросы клиентов в WhatsApp, Telegram, imo, MAX, Slack, по email и в онлайн-чате на сайте.
 - Присылают результаты вам на почту, в Telegram, WhatsApp или Slack.
 - Работают с любыми API и с вашими Google Таблицами и Документами, когда вы их подключите.
 - Работают по расписанию: каждые N минут или часов либо каждый день в точное время («каждый день в 07:00»).

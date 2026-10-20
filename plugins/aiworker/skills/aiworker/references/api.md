@@ -132,6 +132,12 @@ Body: `[]`
 - `per_page` (query)
 - `page` (query)
 
+### `POST /conversations`
+
+Написать контакту первым в Slack (личное сообщение от бота ИИ-сотрудника; уходит через обычную очередь отправки)
+
+Body: `{"contact_id":"integer","channel":"string","text":"string","worker_id":"integer"}`, required: contact_id, channel, text
+
 ### `GET /conversations/{id}/messages`
 
 Сообщения диалога

@@ -11,8 +11,8 @@ owner do that from their own Codex or Claude.
 
 What an AI employee can do (so you know what to offer): collect data from websites and Telegram channels; do anything
 on a website except signing in (the owner signs in once, the employee keeps that session); run tasks in the owner's own
-Edge/Chrome/Firefox through the AI Worker extension (`run_on: "client_browser"`); write on WhatsApp, Telegram, imo and
-MAX, including first; email; hold conversations with customers there, by email and in the website chat; send results by
+Edge/Chrome/Firefox through the AI Worker extension (`run_on: "client_browser"`); write on WhatsApp, Telegram, imo,
+MAX and Slack, including first; email; hold conversations with customers there, by email and in the website chat; send results by
 email, Telegram, WhatsApp or Slack; call any API; work with the owner's Google Sheets and Docs; run every N minutes or
 every day at an exact time (`daily_at`).
 
