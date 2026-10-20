@@ -6,6 +6,21 @@ Generated from the server's catalogue — the same list the AI Worker editor and
 `{{secret.NAME}}` (and only in `api` steps). Steps marked «kind: web» are for site tasks, «telegram» for Telegram tasks,
 «common» for both. A step that sends something (`submit: true`, `tg_send`) runs only after a `decide` allowed it.
 
+## Step templates
+
+### `use` — Step template (kind: common)
+
+A ready group of steps the platform developers built and tested for a hard site (for example, posting to a Facebook group or approving requests to join it): it runs as one step, you only give the parameters — the group address, the text. A template works on its own sites: they must be among the task's sites. When a template is fixed, the fix reaches every task at once. Put a template that sends where an ordinary send goes: inside «For each» after «AI evaluates» or into the respond procedure.
+
+| field | type | meaning |
+|---|---|---|
+| `template` | tpl | Which template |
+| `params` | tparams | Template parameters |
+
+```json
+{"op":"use","template":"facebook_group_approve_requests","params":{"group_url":"https://www.facebook.com/groups/gloap"}}
+```
+
 ## Page and navigation
 
 ### `goto` — Open page (kind: web)

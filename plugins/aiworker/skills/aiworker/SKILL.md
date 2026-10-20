@@ -42,6 +42,11 @@ Workflow:
    every site and how to read it), `criteria` (what fits), `targets`, `every_minutes`. **Leave `program` out** unless
    the owner asked for an exact scenario: AI Worker's own AI opens the sites in the employee's browser, writes the
    scenario and shows it to the owner. Write a program only from `references/program-steps.md`; wrong selectors fail.
+   For sites the platform has **step templates** for (Facebook groups: posting, approving join requests), say in `goal`
+   which template to use and give its parameters (the group address, the text): AI Worker's AI then puts the template in
+   as one step `{"op": "use", "template": "<slug>", "params": {…}}` instead of guessing the site's selectors. The active
+   templates, their slugs and parameters are in the connected account's `guide` (and on the panel's command reference);
+   a template's sites must be among the task's `targets`.
 3. Check it: valid JSON, `format` is `aiworker.bundle/1`, every `ref` unique, every `*_ref` points to an item of the file.
 4. Give the owner the file (save it as `aiworker-<what>.json`) and the import steps above. In the panel the import starts
    everything by default («Сразу запустить»): tasks run (one without a program once AI Worker has written it), contact
