@@ -75,7 +75,7 @@ bearer_token_env_var = "AIWORKER_API_KEY"
 - Export settings to a file and import a file (check first, then create).
 
 Every change is proposed first and applied only by a separate call after you agree. Billing, users, passwords and other
-accounts are out of reach. Keys never come back in answers.
+accounts are out of reach.
 
 Tools: `get_account`, `guide`, `lookup`, `task_status`, `propose_changes`, `pending_changes`, `apply_changes`,
 `discard_changes`, `export`, `import`.
@@ -155,7 +155,7 @@ bearer_token_env_var = "AIWORKER_API_KEY"
 - Выгружать настройки в файл и загружать файл (сначала проверка, потом создание).
 
 Каждое изменение сначала только предлагается и применяется отдельной командой после вашего согласия. К оплате,
-пользователям, паролям и чужим аккаунтам доступа нет; ключи в ответах не возвращаются.
+пользователям, паролям и чужим аккаунтам доступа нет.
 
 ## Безопасность
 
