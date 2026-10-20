@@ -1,0 +1,12 @@
+{
+  "name": "aiworker-skills",
+  "owner": { "name": "AI Worker (kra.name)", "url": "https://kra.name/integrations/" },
+  "description": "Skills and the MCP server for AI Worker (kra.name): set up AI employee tasks, web chats, personas, contact collections and dialog scenarios from Claude Code.",
+  "plugins": [
+    {
+      "name": "aiworker",
+      "source": "./plugins/aiworker",
+      "description": "The AI Worker skill (settings files aiworker.bundle/1) and the account's MCP server (needs AIWORKER_API_KEY)"
+    }
+  ]
+}

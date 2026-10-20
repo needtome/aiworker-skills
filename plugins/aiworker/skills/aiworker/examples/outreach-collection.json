@@ -1,0 +1,29 @@
+{
+  "format": "aiworker.bundle/1",
+  "items": [
+    {
+      "kind": "audience",
+      "ref": "dentists",
+      "data": {
+        "name": "Стоматологии Киева",
+        "description": "Клиники для предложения онлайн-чата на сайт",
+        "source_type": "web",
+        "source_config": { "query": "стоматология Киев", "geo": "Киев", "limit": 300, "schedule": "once", "target": "companies", "check_messengers": true, "filter_directories": true }
+      }
+    },
+    {
+      "kind": "scenario",
+      "ref": "offer",
+      "data": {
+        "name": "Предложение чата для клиник",
+        "type": "outbound",
+        "goal": "Предложить клинике бесплатно попробовать ИИ-консультанта на сайте и договориться о коротком созвоне.",
+        "instruction": "Пиши коротко и по-человечески, одним сообщением. Не дави. Если неинтересно — вежливо попрощайся и больше не пиши.",
+        "premoderation_mode": "all",
+        "handoff": { "ready_to_book": true, "complaint": true },
+        "rules": [ { "text": "Не называй цен, которых нет в базе знаний." }, { "text": "Не обещай сроков внедрения." } ],
+        "kb": [ { "question": "Сколько стоит?", "answer": "Онлайн-чат для сайта — от $15 в месяц.", "section": "Цены" } ]
+      }
+    }
+  ]
+}

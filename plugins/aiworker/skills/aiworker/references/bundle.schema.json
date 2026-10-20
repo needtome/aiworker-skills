@@ -1,0 +1,770 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://kra.name/app/api/v1/bundle.schema.json",
+    "title": "AI Worker settings file (aiworker.bundle/1)",
+    "description": "Import: panel «Импорт настроек» or POST /api/v1/import (dry_run first). Never put keys, passwords or tokens in a file.",
+    "type": "object",
+    "required": [
+        "format",
+        "items"
+    ],
+    "properties": {
+        "format": {
+            "const": "aiworker.bundle/1"
+        },
+        "exported_at": {
+            "type": "string"
+        },
+        "items": {
+            "type": "array",
+            "maxItems": 200,
+            "items": {
+                "oneOf": [
+                    {
+                        "type": "object",
+                        "required": [
+                            "kind",
+                            "ref",
+                            "data"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                            "kind": {
+                                "const": "persona"
+                            },
+                            "ref": {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9_.-]{1,40}$"
+                            },
+                            "data": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 60
+                                    },
+                                    "last_name": {
+                                        "type": "string",
+                                        "maxLength": 60
+                                    },
+                                    "gender": {
+                                        "enum": [
+                                            "male",
+                                            "female"
+                                        ]
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "maxLength": 120,
+                                        "description": "role shown to visitors"
+                                    },
+                                    "instruction": {
+                                        "type": "string",
+                                        "maxLength": 20000,
+                                        "description": "how the consultant talks and what it may say"
+                                    },
+                                    "default_lang": {
+                                        "type": "string",
+                                        "maxLength": 3
+                                    },
+                                    "languages": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "maxLength": 10
+                                        }
+                                    },
+                                    "translations": {
+                                        "type": "object"
+                                    },
+                                    "avatar_url": {
+                                        "type": "string",
+                                        "pattern": "^https://"
+                                    }
+                                },
+                                "required": [
+                                    "name"
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "type": "object",
+                        "required": [
+                            "kind",
+                            "ref",
+                            "data"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                            "kind": {
+                                "const": "web_chat"
+                            },
+                            "ref": {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9_.-]{1,40}$"
+                            },
+                            "data": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 120
+                                    },
+                                    "persona_ref": {
+                                        "type": "string",
+                                        "pattern": "^[A-Za-z0-9_.-]{1,40}$"
+                                    },
+                                    "knowledge": {
+                                        "type": "array",
+                                        "maxItems": 50,
+                                        "items": {
+                                            "oneOf": [
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "type": {
+                                                            "const": "text"
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "maxLength": 120
+                                                        },
+                                                        "content": {
+                                                            "type": "string",
+                                                            "maxLength": 50000,
+                                                            "description": "FAQ as «Вопрос: …\\nОтвет: …» pairs or free text"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "type",
+                                                        "content"
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "type": {
+                                                            "enum": [
+                                                                "site",
+                                                                "url",
+                                                                "gsheet",
+                                                                "gdoc"
+                                                            ]
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "maxLength": 120
+                                                        },
+                                                        "url": {
+                                                            "type": "string",
+                                                            "pattern": "^https?://"
+                                                        },
+                                                        "max_pages": {
+                                                            "type": "integer",
+                                                            "minimum": 1,
+                                                            "maximum": 200
+                                                        },
+                                                        "refresh_days": {
+                                                            "enum": [
+                                                                1,
+                                                                3,
+                                                                7,
+                                                                14,
+                                                                30
+                                                            ]
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "type",
+                                                        "url"
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "settings": {
+                                        "type": "object",
+                                        "properties": {
+                                            "theme": {
+                                                "enum": [
+                                                    "classic",
+                                                    "bar",
+                                                    "panel",
+                                                    "inline"
+                                                ]
+                                            },
+                                            "scheme": {
+                                                "enum": [
+                                                    "light",
+                                                    "dim",
+                                                    "dark",
+                                                    "auto"
+                                                ]
+                                            },
+                                            "color": {
+                                                "type": "string",
+                                                "pattern": "^#[0-9a-fA-F]{6}$"
+                                            },
+                                            "position": {
+                                                "enum": [
+                                                    "left",
+                                                    "right"
+                                                ]
+                                            },
+                                            "voice": {
+                                                "type": "boolean"
+                                            },
+                                            "knowledge_mode": {
+                                                "enum": [
+                                                    "kb_only",
+                                                    "kb_general"
+                                                ]
+                                            },
+                                            "languages": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string",
+                                                    "maxLength": 10
+                                                }
+                                            },
+                                            "default_lang": {
+                                                "type": "string",
+                                                "maxLength": 10
+                                            },
+                                            "language_mode": {
+                                                "type": "string",
+                                                "maxLength": 20
+                                            },
+                                            "names": {
+                                                "type": "object",
+                                                "additionalProperties": {
+                                                    "type": "string"
+                                                },
+                                                "description": "language code → text"
+                                            },
+                                            "titles": {
+                                                "type": "object",
+                                                "additionalProperties": {
+                                                    "type": "string"
+                                                },
+                                                "description": "language code → text"
+                                            },
+                                            "tab_labels": {
+                                                "type": "object",
+                                                "additionalProperties": {
+                                                    "type": "string"
+                                                },
+                                                "description": "language code → text"
+                                            },
+                                            "greeting": {
+                                                "type": "object",
+                                                "additionalProperties": {
+                                                    "type": "string"
+                                                },
+                                                "description": "language code → text"
+                                            },
+                                            "suggestions": {
+                                                "type": "object",
+                                                "additionalProperties": {
+                                                    "type": "array",
+                                                    "maxItems": 4,
+                                                    "items": {
+                                                        "type": "string",
+                                                        "maxLength": 150
+                                                    }
+                                                }
+                                            },
+                                            "allowed_domains": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string",
+                                                    "maxLength": 253
+                                                },
+                                                "description": "sites where the widget may run"
+                                            }
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "name"
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "type": "object",
+                        "required": [
+                            "kind",
+                            "ref",
+                            "data"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                            "kind": {
+                                "const": "task"
+                            },
+                            "ref": {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9_.-]{1,40}$"
+                            },
+                            "data": {
+                                "type": "object",
+                                "properties": {
+                                    "kind": {
+                                        "enum": [
+                                            "web",
+                                            "telegram"
+                                        ],
+                                        "description": "web — sites in the employee's browser; telegram — groups and channels"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 160
+                                    },
+                                    "goal": {
+                                        "type": "string",
+                                        "maxLength": 6000,
+                                        "description": "what to do on every run, in the owner's words; the AI writes the scenario from it when there is no program"
+                                    },
+                                    "criteria": {
+                                        "type": "string",
+                                        "maxLength": 6000,
+                                        "description": "what fits: the AI judges every element against it (score 0–100)"
+                                    },
+                                    "targets": {
+                                        "type": "array",
+                                        "maxItems": 100,
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "description": "web: start URLs (https://…, up to 10); telegram: @groups (up to 100)"
+                                    },
+                                    "needs_auth": {
+                                        "type": "boolean",
+                                        "description": "the site needs the owner's login (done by the owner on the employee's desktop)"
+                                    },
+                                    "mode": {
+                                        "enum": [
+                                            "draft",
+                                            "auto"
+                                        ],
+                                        "description": "imported as draft; auto is switched on by the owner"
+                                    },
+                                    "auto_threshold": {
+                                        "type": "integer",
+                                        "minimum": 50,
+                                        "maximum": 100
+                                    },
+                                    "every_minutes": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "description": "0 — only by hand, a webhook or another task's results"
+                                    },
+                                    "hours_from": {
+                                        "type": "string",
+                                        "pattern": "^([01]?\\d|2[0-3]):[0-5]\\d$"
+                                    },
+                                    "hours_to": {
+                                        "type": "string",
+                                        "pattern": "^([01]?\\d|2[0-3]):[0-5]\\d$"
+                                    },
+                                    "webhook": {
+                                        "type": "boolean",
+                                        "description": "a new webhook address is made; the program reads the list «events»"
+                                    },
+                                    "results_off": {
+                                        "type": "boolean"
+                                    },
+                                    "params": {
+                                        "type": "object",
+                                        "properties": {
+                                            "profile": {
+                                                "type": "string",
+                                                "maxLength": 6000,
+                                                "description": "about the owner: used in replies and decisions"
+                                            },
+                                            "email_subject": {
+                                                "type": "string",
+                                                "maxLength": 200
+                                            },
+                                            "email_brief": {
+                                                "type": "boolean"
+                                            },
+                                            "email_digest": {
+                                                "type": "boolean"
+                                            },
+                                            "notify_done": {
+                                                "type": "boolean"
+                                            },
+                                            "max_results": {
+                                                "type": "integer"
+                                            },
+                                            "max_actions": {
+                                                "type": "integer",
+                                                "minimum": 100,
+                                                "maximum": 10000
+                                            },
+                                            "run_on": {
+                                                "enum": [
+                                                    "client_browser"
+                                                ]
+                                            },
+                                            "no_browser": {
+                                                "enum": [
+                                                    "server",
+                                                    "wait"
+                                                ]
+                                            },
+                                            "every_max": {
+                                                "type": "integer"
+                                            },
+                                            "summary": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "every": {
+                                                        "enum": [
+                                                            "daily",
+                                                            "weekly"
+                                                        ]
+                                                    },
+                                                    "hour": {
+                                                        "type": "integer",
+                                                        "minimum": 0,
+                                                        "maximum": 23
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "audience_ref": {
+                                        "type": "string",
+                                        "pattern": "^[A-Za-z0-9_.-]{1,40}$"
+                                    },
+                                    "deliver_to_refs": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "pattern": "^[A-Za-z0-9_.-]{1,40}$"
+                                        },
+                                        "description": "tasks of this file that get this task's results as input events"
+                                    },
+                                    "feeds_ref": {
+                                        "type": "string",
+                                        "pattern": "^[A-Za-z0-9_.-]{1,40}$"
+                                    },
+                                    "program": {
+                                        "type": "object",
+                                        "description": "optional scenario: {start_url?, steps:[{op, …}]}; ops: goto, back, reload, check_auth, page_state, dismiss, click, click_text, type, set_value, clear, select, check, press, hover, mouse, scroll, wait, wait_until, get, extract, extract_list, feed, fetch, api, json_list, storage_get, open_tab, close_tab, download, upload, screenshot, tg_join, tg_fetch, tg_search, tg_send, tg_discover, add_target, audience_fetch, for_each, if, repeat, break, try, call, jump, pause, stop, set, calc, regex, date, match, filter, dedupe, push, keep, decide, ai, save, notify. Keys only as {{secret.NAME}}. Without a program the AI writes it.",
+                                        "properties": {
+                                            "start_url": {
+                                                "type": "string"
+                                            },
+                                            "steps": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "op"
+                                                    ],
+                                                    "properties": {
+                                                        "op": {
+                                                            "enum": [
+                                                                "goto",
+                                                                "back",
+                                                                "reload",
+                                                                "check_auth",
+                                                                "page_state",
+                                                                "dismiss",
+                                                                "click",
+                                                                "click_text",
+                                                                "type",
+                                                                "set_value",
+                                                                "clear",
+                                                                "select",
+                                                                "check",
+                                                                "press",
+                                                                "hover",
+                                                                "mouse",
+                                                                "scroll",
+                                                                "wait",
+                                                                "wait_until",
+                                                                "get",
+                                                                "extract",
+                                                                "extract_list",
+                                                                "feed",
+                                                                "fetch",
+                                                                "api",
+                                                                "json_list",
+                                                                "storage_get",
+                                                                "open_tab",
+                                                                "close_tab",
+                                                                "download",
+                                                                "upload",
+                                                                "screenshot",
+                                                                "tg_join",
+                                                                "tg_fetch",
+                                                                "tg_search",
+                                                                "tg_send",
+                                                                "tg_discover",
+                                                                "add_target",
+                                                                "audience_fetch",
+                                                                "for_each",
+                                                                "if",
+                                                                "repeat",
+                                                                "break",
+                                                                "try",
+                                                                "call",
+                                                                "jump",
+                                                                "pause",
+                                                                "stop",
+                                                                "set",
+                                                                "calc",
+                                                                "regex",
+                                                                "date",
+                                                                "match",
+                                                                "filter",
+                                                                "dedupe",
+                                                                "push",
+                                                                "keep",
+                                                                "decide",
+                                                                "ai",
+                                                                "save",
+                                                                "notify"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "manual_program": {
+                                        "type": "boolean",
+                                        "description": "the program is hand-made: the AI never rewrites it"
+                                    },
+                                    "secret_names": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "pattern": "^[A-Z][A-Z0-9_]{1,40}$"
+                                        },
+                                        "description": "names of the keys the program uses; values are entered by the owner"
+                                    }
+                                },
+                                "required": [
+                                    "kind",
+                                    "name"
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "type": "object",
+                        "required": [
+                            "kind",
+                            "ref",
+                            "data"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                            "kind": {
+                                "const": "audience"
+                            },
+                            "ref": {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9_.-]{1,40}$"
+                            },
+                            "data": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 120
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "maxLength": 2000
+                                    },
+                                    "source_type": {
+                                        "enum": [
+                                            "web",
+                                            "sheet",
+                                            "url"
+                                        ]
+                                    },
+                                    "source_config": {
+                                        "type": "object",
+                                        "properties": {
+                                            "query": {
+                                                "type": "string",
+                                                "maxLength": 500,
+                                                "description": "web: what to look for, e.g. «стоматологии Киев»"
+                                            },
+                                            "geo": {
+                                                "type": "string",
+                                                "maxLength": 120
+                                            },
+                                            "limit": {
+                                                "type": "integer",
+                                                "minimum": 1
+                                            },
+                                            "schedule": {
+                                                "enum": [
+                                                    "once",
+                                                    "daily",
+                                                    "weekly"
+                                                ]
+                                            },
+                                            "target": {
+                                                "enum": [
+                                                    "companies",
+                                                    "telegram"
+                                                ]
+                                            },
+                                            "check_messengers": {
+                                                "type": "boolean"
+                                            },
+                                            "filter_directories": {
+                                                "type": "boolean"
+                                            },
+                                            "sheet_url": {
+                                                "type": "string"
+                                            },
+                                            "sheet_tab": {
+                                                "type": "string",
+                                                "maxLength": 100
+                                            },
+                                            "url": {
+                                                "type": "string"
+                                            },
+                                            "refresh": {
+                                                "enum": [
+                                                    "daily",
+                                                    "hourly"
+                                                ]
+                                            },
+                                            "field_phone": {
+                                                "type": "string",
+                                                "maxLength": 60
+                                            },
+                                            "field_name": {
+                                                "type": "string",
+                                                "maxLength": 60
+                                            }
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "name",
+                                    "source_type"
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "type": "object",
+                        "required": [
+                            "kind",
+                            "ref",
+                            "data"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                            "kind": {
+                                "const": "scenario"
+                            },
+                            "ref": {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9_.-]{1,40}$"
+                            },
+                            "data": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 120
+                                    },
+                                    "type": {
+                                        "enum": [
+                                            "inbound",
+                                            "outbound",
+                                            "event"
+                                        ]
+                                    },
+                                    "goal": {
+                                        "type": "string",
+                                        "maxLength": 2000
+                                    },
+                                    "instruction": {
+                                        "type": "string",
+                                        "maxLength": 20000
+                                    },
+                                    "premoderation_mode": {
+                                        "enum": [
+                                            "inherit",
+                                            "all",
+                                            "none"
+                                        ]
+                                    },
+                                    "handoff": {
+                                        "type": "object"
+                                    },
+                                    "closing": {
+                                        "type": "object"
+                                    },
+                                    "rules": {
+                                        "type": "array",
+                                        "maxItems": 200,
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "text": {
+                                                    "type": "string",
+                                                    "maxLength": 2000
+                                                },
+                                                "enabled": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "text"
+                                            ]
+                                        }
+                                    },
+                                    "kb": {
+                                        "type": "array",
+                                        "maxItems": 500,
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "question": {
+                                                    "type": "string",
+                                                    "maxLength": 500
+                                                },
+                                                "answer": {
+                                                    "type": "string",
+                                                    "maxLength": 5000
+                                                },
+                                                "section": {
+                                                    "type": "string",
+                                                    "maxLength": 120
+                                                }
+                                            },
+                                            "required": [
+                                                "question",
+                                                "answer"
+                                            ]
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "name"
+                                ]
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}

@@ -1,0 +1,20 @@
+{
+  "format": "aiworker.bundle/1",
+  "items": [
+    {
+      "kind": "task",
+      "ref": "freelance",
+      "data": {
+        "kind": "web",
+        "name": "Новые заказы по Laravel",
+        "goal": "Каждый запуск проверять новые заказы на двух биржах и присылать мне подходящие.\n1) https://freelancehunt.com/projects — открыть список проектов, собрать карточки: название, ссылка, бюджет, описание; открыть карточку, если описание в списке обрезано.\n2) https://www.upwork.com/nx/search/jobs/?q=laravel — собрать вакансии из выдачи: название, ссылка, бюджет или ставка, описание.\nОценить каждый новый заказ по критериям и прислать подходящие на почту одним письмом.",
+        "criteria": "Подходит: разработка или доработка на Laravel/PHP, API, интеграции, админки. Бюджет от $300 или ставка от $25/ч.\nНе подходит: WordPress-темы, вёрстка без бэкенда, «нужен сайт за $50», вакансии в штат.",
+        "targets": ["https://freelancehunt.com/projects", "https://www.upwork.com/nx/search/jobs/?q=laravel"],
+        "every_minutes": 30,
+        "hours_from": "08:00",
+        "hours_to": "22:00",
+        "params": { "profile": "Я Laravel-разработчик, 8 лет опыта, делаю API и интеграции.", "email_digest": true }
+      }
+    }
+  ]
+}

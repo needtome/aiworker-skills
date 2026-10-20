@@ -1,0 +1,29 @@
+{
+  "format": "aiworker.bundle/1",
+  "items": [
+    {
+      "kind": "task",
+      "ref": "find",
+      "data": {
+        "kind": "web",
+        "name": "Поиск тендеров",
+        "goal": "Открывать https://tenders.example.com/search?q=ремонт — собирать новые тендеры: название, ссылка, заказчик, сумма, срок подачи.",
+        "criteria": "Подходит: ремонт офисов и коммерческих помещений в Киеве, сумма от 200 000 грн.",
+        "targets": ["https://tenders.example.com/search?q=ремонт"],
+        "every_minutes": 120,
+        "deliver_to_refs": ["details"]
+      }
+    },
+    {
+      "kind": "task",
+      "ref": "details",
+      "data": {
+        "kind": "web",
+        "name": "Разбор тендеров",
+        "goal": "Для каждого полученного тендера открыть его страницу (адрес — в url события), выписать требования к участнику, перечень документов и контакт заказчика; прислать мне сводку.",
+        "targets": ["https://tenders.example.com/"],
+        "every_minutes": 0
+      }
+    }
+  ]
+}

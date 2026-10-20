@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "aiworker": {
+      "type": "http",
+      "url": "https://kra.name/app/api/mcp",
+      "headers": {
+        "Authorization": "Bearer ${AIWORKER_API_KEY}"
+      }
+    }
+  }
+}
