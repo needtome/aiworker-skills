@@ -1,10 +1,19 @@
 {
   "name": "aiworker",
-  "version": "1.0.0",
   "description": "Set up AI Worker (kra.name) from Claude Code: tasks for AI employees on websites and in Telegram, web chats, personas, contact collections and dialog scenarios — as settings files or directly through the account's MCP server.",
-  "author": { "name": "AI Worker", "url": "https://kra.name/" },
+  "author": {
+    "name": "AI Worker",
+    "url": "https://kra.name/"
+  },
   "homepage": "https://kra.name/integrations/",
   "repository": "https://github.com/needtome/aiworker-skills",
   "license": "MIT",
-  "keywords": ["ai-worker", "kra.name", "mcp", "automation", "web-chat", "ai-employee"]
+  "keywords": [
+    "ai-worker",
+    "kra.name",
+    "mcp",
+    "automation",
+    "web-chat",
+    "ai-employee"
+  ]
 }
