@@ -74,6 +74,22 @@ Always two steps, like the panel's setup wizard: `propose_changes` checks the ac
 the owner the returned summaries and refusals; call `apply_changes` **only after the owner agrees**. For a set of new
 items use `import` with `dry_run: true` first, then `dry_run: false` after the owner agrees.
 
+## Working with tasks
+
+- **Create.** File mode: a `task` item (see `references/bundle-format.md`). Connected: action `automation_create` with the
+  payload from `guide`. AI Worker's own AI then opens the sites, writes the scenario and shows it to the owner; a task
+  with a scenario from a file waits «на проверке» until the owner switches it on (`automation_activate`).
+- **Edit.** `automation_update` with only the fields that change. What fits (`criteria`), the schedule, where results go,
+  the threshold and the name never rewrite the scenario. A new goal or other sites do: add `"reauthor": true` (or
+  `automation_targets_add` / `automation_targets_remove` for sites and groups). Run now — `automation_run`; pause —
+  `automation_pause`; a key the scenario needs — `automation_secret_set`.
+- **Logs and results.** `task_status` (REST `GET /tasks/{id}`): status, the last error, the scenario's steps, the last
+  runs with what was seen, judged, matched and mailed, and which keys are missing. For a concrete element («why did it
+  not send me this project?») — `lookup` (REST `POST /lookup`) with the link: whether the task found it, when, the AI's
+  score and reason, whether it was mailed, and the run log lines about it. The owner sees the same on the task page
+  («Отчёт») in the panel.
+- Every method of the REST API and the MCP tools: `references/api.md`.
+
 ## Good tasks
 
 - One task = one recurring job. Put each source and how to read it into `goal` ("1) freelancehunt.com/projects —
@@ -92,5 +108,6 @@ items use `import` with `dry_run: true` first, then `dry_run: false` after the o
 - `references/bundle.schema.json` — JSON Schema of the file.
 - `references/program-steps.md` — every step a task program may use, with fields and examples.
 - `references/wizard-actions.md` — the actions of connected mode (same list as the `guide` tool).
+- `references/api.md` — every REST API method and the MCP tools, generated from the server's OpenAPI document.
 - `examples/` — ready files: a task that watches freelance sites, a web chat with FAQ, a chain of two tasks, a contact
   collection with an outreach scenario.

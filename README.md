@@ -74,8 +74,7 @@ bearer_token_env_var = "AIWORKER_API_KEY"
   and knowledge sources; edit persona and employee instructions; store a task's API key.
 - Export settings to a file and import a file (check first, then create).
 
-Every change is proposed first and applied only by a separate call after you agree. Billing, users, passwords and other
-accounts are out of reach.
+Every change is proposed first and applied only by a separate call after you agree.
 
 Tools: `get_account`, `guide`, `lookup`, `task_status`, `propose_changes`, `pending_changes`, `apply_changes`,
 `discard_changes`, `export`, `import`.
@@ -154,8 +153,7 @@ bearer_token_env_var = "AIWORKER_API_KEY"
   FAQ, вид и источники знаний чата; инструкции личности и ИИ-сотрудника; сохранить ключ API задания.
 - Выгружать настройки в файл и загружать файл (сначала проверка, потом создание).
 
-Каждое изменение сначала только предлагается и применяется отдельной командой после вашего согласия. К оплате,
-пользователям, паролям и чужим аккаунтам доступа нет.
+Каждое изменение сначала только предлагается и применяется отдельной командой после вашего согласия.
 
 ## Безопасность
 
