@@ -419,6 +419,11 @@
                                             "every_max": {
                                                 "type": "integer"
                                             },
+                                            "daily_at": {
+                                                "type": "string",
+                                                "pattern": "^([01]?[0-9]|2[0-3]):[0-5][0-9]$",
+                                                "description": "every day at this time (HH:MM, the AI employee's time zone), no jitter; every_minutes and hours_* are then ignored"
+                                            },
                                             "summary": {
                                                 "type": "object",
                                                 "properties": {

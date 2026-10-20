@@ -107,6 +107,9 @@ leaves them for the owner). Run, switch on or pause a task: `automation_run`, `a
   open the list, collect cards …; 2) …").
 - `criteria` is what the AI judges every found element against (score 0–100); be concrete about what fits and what
   does not.
+- A named time («every day at 7 am») is `daily_at: "07:00"` (connected mode: in the `automation_create` /
+  `automation_update` payload; file mode: `params.daily_at`) — exact, in the AI employee's time zone. `every_minutes`
+  is an interval with ±20 % jitter, so «daily» alone may drift by hours.
 - Prefer `every_minutes` ≥ 30 for sites; Telegram groups: ≥ 60. `0` means only by hand, by webhook or from another
   task's results.
 - Results go to the owner by mail by default. A chain (one task's results become another's input) is

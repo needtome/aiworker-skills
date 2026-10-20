@@ -29,6 +29,7 @@
 | `mode` | `draft` \| `auto` | imported as `draft` (everything to the owner for approval); `auto` is the owner's switch |
 | `auto_threshold` | 50–100 | score from which "auto" sends by itself (default 98) |
 | `every_minutes` | int | 0 — only by hand / webhook / chain; otherwise the period |
+| `params.daily_at` | "HH:MM" | every day at this exact time (the AI employee's time zone), no jitter; use it when the owner names a time («every day at 7 am»); `every_minutes` and `hours_*` are then ignored |
 | `hours_from`, `hours_to` | `HH:MM` | working hours (the account's time zone) |
 | `webhook` | bool | the task gets a webhook address (made on import); the program reads the list `events` |
 | `results_off` | bool | do not send results anywhere |
