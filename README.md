@@ -6,6 +6,23 @@ AI Worker account from a plain description.
 
 **[Русский — ниже](#скилы-и-mcp-ai-worker-для-codex-и-claude)** · All add-ons: https://kra.name/integrations/
 
+## What AI employees can do
+
+- Collect information from websites and Telegram channels.
+- Do anything on any website except signing in: where a login is needed, you sign in once yourself, and the AI employee
+  works with that session from then on.
+- Run in your own browser: dedicate an Edge, Chrome or Firefox browser (or one of its profiles) on your computer with
+  the AI Worker extension, and the jobs run there, with your logins and your IP.
+- Message people on WhatsApp, Telegram, imo and MAX — including writing first.
+- Send emails.
+- Hold conversations and answer customers' questions on WhatsApp, Telegram, imo, MAX, by email and in the chat on your
+  website.
+- Send you the results by email, Telegram, WhatsApp or Slack.
+- Work with any API, and with your Google Sheets and Docs once you connect them.
+- Run on a schedule: every N minutes or hours, or every day at an exact time («every day at 07:00»).
+
+Everything above can be set up from your Codex or Claude through this skill and the MCP server.
+
 ## What is here
 
 - **The skill** — `plugins/aiworker/skills/aiworker/`. Works in Claude Code, Codex and Claude in the browser or the app.
@@ -138,6 +155,22 @@ The same is available as a plain REST API: https://kra.name/app/api/docs.
 Codex или Claude настраивать аккаунт AI Worker по вашему описанию.
 
 Все дополнения: https://kra.name/ru/integrations/
+
+## Что могут ИИ-сотрудники
+
+- Собирают информацию на сайтах и в Telegram-каналах.
+- Выполняют любые действия на любых сайтах, кроме входа в аккаунт: где нужен вход, вы входите сами один раз, и дальше
+  ИИ-сотрудник работает с этим входом.
+- Работают в вашем браузере: выделите Edge, Chrome или Firefox (или один из его профилей) на своём компьютере с
+  расширением AI Worker — задания будут выполняться в нём, с вашими входами и вашим IP.
+- Пишут в WhatsApp, Telegram, imo и MAX — в том числе первыми.
+- Пишут письма по email.
+- Ведут переписку и отвечают на вопросы клиентов в WhatsApp, Telegram, imo, MAX, по email и в онлайн-чате на сайте.
+- Присылают результаты вам на почту, в Telegram, WhatsApp или Slack.
+- Работают с любыми API и с вашими Google Таблицами и Документами, когда вы их подключите.
+- Работают по расписанию: каждые N минут или часов либо каждый день в точное время («каждый день в 07:00»).
+
+Всё это настраивается из вашего Codex или Claude через этот скил и MCP-сервер.
 
 ## Что здесь
 
