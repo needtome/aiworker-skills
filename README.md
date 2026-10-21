@@ -141,9 +141,8 @@ dependencies) brings each event to the agent within seconds.
 
 - Events come from the route's own address (your CRM, shop or form posts JSON to it), from a task step
   *Hand to AI agent*, or from `POST /api/v1/agent/events`.
-- **Answers to your feature requests:** when your AI filed a request for something AI Worker cannot do yet, tick
-  *Send the developers' answers to my feature requests here* on the route — when the request is done or answered, the
-  agent learns at once and tells you. Without such a route the answer is in the panel and in the `feature_requests` tool.
+- **Answers to your feature requests:** when your AI filed a request for something AI Worker cannot do yet, it gets the
+  developers' answer by itself with its next AI Worker call and tells you at once — nothing to set up.
 - **Open session:** tell your Claude Code "listen to AI Worker events of route orders". It starts the listener with its
   Monitor tool; every event wakes that session, and the agent marks the event done itself.
 - **In the background:** tell Claude Code or Codex "install the AI Worker background listener for route orders". It sets
