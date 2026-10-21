@@ -81,7 +81,7 @@ tell the owner to restart Codex or Claude Code.
   ```
 
 Tools: `get_account` (chats, personas, employees, tasks with ids), `guide` (the actions and their rules — read it
-before proposing), `lookup` (what tasks did with given links), `task_status`, `propose_changes`, `pending_changes`,
+before proposing), `lookup` (what tasks did with given links), `task_status`, `task_items`, `propose_changes`, `pending_changes`,
 `apply_changes`, `discard_changes`, `export`, `import`, `agent_routes`, `agent_events`, `agent_ack` (see "Events straight
 to your Claude or Codex").
 
@@ -113,6 +113,9 @@ leaves them for the owner). Run, switch on or pause a task: `automation_run`, `a
   the threshold and the name never rewrite the scenario. A new goal or other sites do: add `"reauthor": true` (or
   `automation_targets_add` / `automation_targets_remove` for sites and groups). Run now — `automation_run`; pause —
   `automation_pause`; a key the scenario needs — `automation_secret_set`.
+- **Found items and the AI's scores.** `task_items` (REST `GET /tasks/{id}/items`): everything a task found with the score
+  0-100, the decision and its reason, for a date range (`from`/`to`, account timezone), filtered by `status` / `min_score` /
+  `max_score`, pages of up to 500 (`with_text` adds the item text). Use it to review a period of decisions, not `task_status`.
 - **Logs and results.** `task_status` (REST `GET /tasks/{id}`): status, the last error, the scenario's steps, the last
   runs with what was seen, judged, matched and mailed, and which keys are missing. For a concrete element («why did it
   not send me this project?») — `lookup` (REST `POST /lookup`) with the link: whether the task found it, when, the AI's
