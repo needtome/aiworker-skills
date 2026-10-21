@@ -92,7 +92,12 @@ Without MCP but with the API key, the same is plain REST (`Authorization: Bearer
 
 Something the account cannot do (no action or tool fits): do not just refuse — call `request_feature` with a detailed
 description in the owner's words; it reaches the developers at once. Tell the owner «Сейчас этого сделать нельзя, но я
-отправил заявку на разработку» with the request number.
+отправил заявку на разработку (номер). Сообщу, когда её сделают». The developers' answer arrives as an AI Worker event
+`feature_request_reply` to a route with «ответы на заявки» (`feature_replies`) while the listener runs; `feature_requests`
+(REST `GET /feature-requests`) lists the requests with their status and answers any time. When it comes, tell the owner.
+If `request_feature` says no route takes the answers (`reply_route: false`), offer the owner once: a route for this agent
+(`agent_route_create` with `"feature_replies": true`, `target` `codex` or `claude`) plus its listener (see "Events
+straight to your Claude or Codex"); without it check `feature_requests` when the owner comes back.
 
 Always two steps, like the panel's setup wizard: `propose_changes` checks the actions and keeps the valid ones; show
 the owner the returned summaries and refusals; call `apply_changes` **only after the owner agrees**. For a set of new
