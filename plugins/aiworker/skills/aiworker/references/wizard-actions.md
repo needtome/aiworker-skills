@@ -7,6 +7,7 @@ on apply.
 - `persona_instruction_append` — Дополнить инструкцию личности
 - `persona_instruction_replace` — Заменить инструкцию личности
 - `persona_field` — Изменить имя, фамилию, пол или должность личности
+- `persona_create` — Создать личность (консультанта)
 - `worker_instruction_append` — Дополнить инструкцию ИИ-сотрудника
 - `worker_instruction_replace` — Заменить инструкцию ИИ-сотрудника
 - `faq_add` — Добавить вопрос в FAQ
@@ -28,6 +29,8 @@ on apply.
 - `audience_collect` — Собрать в интернете контакты или Telegram-каналы (аудитория)
 - `audience_start` — Запустить или продолжить сбор контактов (аудитория из context.audiences)
 - `audience_pause` — Поставить сбор контактов на паузу
+- `audience_finish` — Завершить сбор контактов сейчас (собранное остаётся)
+- `audience_archive` — Убрать аудиторию в архив (контакты остаются)
 - `feature_request` — Оставить заявку разработчикам на функционал, которого пока нет
 - `automation_activate` — Включить задание после проверки сценария
 - `automation_run` — Запустить задание сейчас

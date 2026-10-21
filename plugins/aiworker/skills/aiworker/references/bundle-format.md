@@ -54,8 +54,8 @@ is switched on and runs; without it AI Worker's AI explores the sites, writes th
 
 | field | meaning |
 |---|---|
-| `name` | required |
-| `persona_ref` | ref → persona (the consultant); without it the account's default persona |
+| `name` | optional — without it the chat is «Чат N» |
+| `persona_ref` | ref → persona (the consultant and its knowledge); without it the account's default persona |
 | `settings.theme` | `classic` (button + window), `bar` (line at the bottom), `panel` (side panel), `inline` (block in the page) |
 | `settings.scheme` | `light`, `dim`, `dark`, `auto` |
 | `settings.color` | `#rrggbb` |
@@ -65,15 +65,17 @@ is switched on and runs; without it AI Worker's AI explores the sites, writes th
 | `settings.greeting`, `settings.titles`, `settings.names`, `settings.tab_labels` | per language: `{"ru": "Здравствуйте!", "en": "Hello!"}` |
 | `settings.suggestions` | per language: up to 4 quick questions `{"ru": ["Цены", "Доставка"]}` |
 | `settings.allowed_domains` | sites where the widget may run: `["shop.example.com"]` |
-| `knowledge` | up to 50 sources: `{"type":"text","name":"Вопросы и ответы","content":"Вопрос: …\nОтвет: …\n\nВопрос: …"}` or `{"type":"site"\|"url"\|"gsheet"\|"gdoc","url":"https://…","max_pages":20,"refresh_days":7}` |
+| `knowledge` | the chat's own sources (older files; new knowledge belongs to the persona — if the persona is used only by this chat of the file, they go to it): up to 50 sources: `{"type":"text","name":"Вопросы и ответы","content":"Вопрос: …\nОтвет: …\n\nВопрос: …"}` or `{"type":"site"\|"url"\|"gsheet"\|"gdoc","url":"https://…","max_pages":20,"refresh_days":7}` |
 
-The chat is created off and switches on when its knowledge is indexed. Files are not carried — the owner uploads them.
+The chat is created off while its linked sources are read and switches on when they are indexed; with text knowledge only, or none
+(it then answers from the persona's role), it is on at once. Files are not carried — the owner uploads them.
 
 ## kind: persona — the consultant of a chat
 
 `name` (required), `last_name`, `gender` (`male`|`female`), `title` (role shown to visitors), `instruction` (how it
 talks, what it may and may not say — e.g. "do not name prices that are not in the knowledge"), `languages`,
-`default_lang`, `avatar_url` (https).
+`default_lang`, `avatar_url` (https), `knowledge` — the persona's sources, the same shape as a chat's `knowledge`; every chat
+of this persona answers from them.
 
 ## kind: audience — a contact collection
 

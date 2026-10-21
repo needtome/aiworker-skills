@@ -80,6 +80,75 @@
                                     "avatar_url": {
                                         "type": "string",
                                         "pattern": "^https://"
+                                    },
+                                    "knowledge": {
+                                        "type": "array",
+                                        "maxItems": 50,
+                                        "items": {
+                                            "oneOf": [
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "type": {
+                                                            "const": "text"
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "maxLength": 120
+                                                        },
+                                                        "content": {
+                                                            "type": "string",
+                                                            "maxLength": 50000,
+                                                            "description": "FAQ as «Вопрос: …\\nОтвет: …» pairs or free text"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "type",
+                                                        "content"
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "type": {
+                                                            "enum": [
+                                                                "site",
+                                                                "url",
+                                                                "gsheet",
+                                                                "gdoc"
+                                                            ]
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "maxLength": 120
+                                                        },
+                                                        "url": {
+                                                            "type": "string",
+                                                            "pattern": "^https?://"
+                                                        },
+                                                        "max_pages": {
+                                                            "type": "integer",
+                                                            "minimum": 1,
+                                                            "maximum": 200
+                                                        },
+                                                        "refresh_days": {
+                                                            "enum": [
+                                                                1,
+                                                                3,
+                                                                7,
+                                                                14,
+                                                                30
+                                                            ]
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "type",
+                                                        "url"
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        "description": "the persona's knowledge: shared by every chat of this persona"
                                     }
                                 },
                                 "required": [
@@ -109,7 +178,8 @@
                                 "properties": {
                                     "name": {
                                         "type": "string",
-                                        "maxLength": 120
+                                        "maxLength": 120,
+                                        "description": "empty: «Чат N»"
                                     },
                                     "persona_ref": {
                                         "type": "string",
@@ -181,7 +251,8 @@
                                                     ]
                                                 }
                                             ]
-                                        }
+                                        },
+                                        "description": "the chat's own sources (older files); new knowledge goes to the persona"
                                     },
                                     "settings": {
                                         "type": "object",
@@ -285,10 +356,7 @@
                                             }
                                         }
                                     }
-                                },
-                                "required": [
-                                    "name"
-                                ]
+                                }
                             }
                         }
                     },

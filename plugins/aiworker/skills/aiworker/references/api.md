@@ -34,7 +34,7 @@ Settings → Integrations; Business plan and above). Answers are JSON; 401 — n
 
 ### `GET /personas`
 
-Личности (консультанты чатов)
+Личности (консультанты чатов): роль, число источников знаний (knowledge_sources), вопросов FAQ (faq) и чатов (chats); чат отвечает по базе знаний своей личности
 
 ### `GET /workers`
 
@@ -119,7 +119,30 @@ Body: `[]`
 
 ### `GET /audiences`
 
-Аудитории: id для добавления контактов без запуска общения
+Аудитории и парсинг (сбор в интернете): id, статус, число контактов; collect_month — месячный лимит сбора тарифа. С source / status / page — подробный список: ход сбора, настройки, страницы
+- `source` (query) — web — только парсинг
+- `status` (query)
+- `with_archived` (query)
+- `limit` (query)
+- `page` (query)
+
+### `GET /audiences/{id}`
+
+Аудитория или задача парсинга: статус, ход сбора (percent, round), настройки, журнал сборщика, какие действия /changes к ней применимы (audience_pause, audience_start, audience_finish, audience_archive)
+- `id` (path, required)
+
+### `GET /audiences/{id}/contacts`
+
+Собранные контакты аудитории по страницам (до 500): имя, телефон, email, Telegram, мессенджеры, сайт, страница, где найден, адрес, когда добавлен
+- `id` (path, required)
+- `from` (query) — добавлен не раньше (часовой пояс аккаунта)
+- `to` (query)
+- `has` (query) — через запятую: phone, email, telegram, messenger
+- `search` (query)
+- `include_disabled` (query)
+- `without_do_not_contact` (query)
+- `limit` (query)
+- `page` (query)
 
 ## Диалоги
 

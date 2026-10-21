@@ -81,13 +81,14 @@ tell the owner to restart Codex or Claude Code.
   ```
 
 Tools: `get_account` (chats, personas, employees, tasks with ids), `guide` (the actions and their rules — read it
-before proposing), `lookup` (what tasks did with given links), `task_status`, `task_items`, `propose_changes`, `pending_changes`,
+before proposing), `lookup` (what tasks did with given links), `task_status`, `task_items`, `audiences`, `audience_status`,
+`audience_rows`, `propose_changes`, `pending_changes`,
 `apply_changes`, `discard_changes`, `export`, `import`, `agent_routes`, `agent_events`, `agent_ack` (see "Events straight
 to your Claude or Codex").
 
 Without MCP but with the API key, the same is plain REST (`Authorization: Bearer <key>`, base
 `https://kra.name/app/api/v1`, reference https://kra.name/app/api/docs): `GET /account`, `GET /tasks/{id}`,
-`POST /lookup`, `GET /guide`, `POST /changes` → `POST /changes/apply` (or `DELETE /changes`), `GET /export`,
+`POST /lookup`, `GET /audiences`, `GET /audiences/{id}`, `GET /audiences/{id}/contacts`, `GET /guide`, `POST /changes` → `POST /changes/apply` (or `DELETE /changes`), `GET /export`,
 `POST /import` (dry run unless `"dry_run": false`).
 
 Something the account cannot do (no action or tool fits): do not just refuse — call `request_feature` with a detailed
@@ -101,8 +102,27 @@ the owner the returned summaries and refusals; call `apply_changes` **only after
 items use `import` with `dry_run: true` first, then `dry_run: false` after the owner agrees — this creates **and
 starts** them (`activate`, default true: tasks run, collections start, «auto» mode as in the file; `activate: false`
 leaves them for the owner). Run, switch on or pause a task: `automation_run`, `automation_activate`,
-`automation_pause`; start or pause a contact collection: `audience_start`, `audience_pause` (ids in
-`get_account().audiences`).
+`automation_pause`; start, pause, finish or archive a contact collection: `audience_start`, `audience_pause`,
+`audience_finish`, `audience_archive` (ids in `audiences` or `get_account().audiences`).
+
+## Parsing (contact collection) and audiences
+
+«Парсинг» in AI Worker is a web collection by the platform's collector: an audience with `source: web` that looks up
+company contacts (phones, e-mails, messengers from public sites) or Telegram channels of a topic. Imported lists
+(`csv`, `sheet`, `url`) are audiences too.
+
+- **List.** `audiences` (REST `GET /audiences?source=web`): status, progress (`percent`, `round`), contacts collected and
+  with messengers, the job's settings, and `collect_month` — the plan's monthly collection limit, used and left.
+- **Status.** `audience_status` (REST `GET /audiences/{id}`): the same plus the collector's log, campaigns that use it and
+  which actions apply now.
+- **Results.** `audience_rows` (REST `GET /audiences/{id}/contacts`): the rows the panel shows (name, phone and more phones,
+  e-mail, Telegram, messengers, site, the page it was found on, address, when added), oldest first, pages of up to 500;
+  `from`/`to` (when added, account timezone), `has` (`phone`, `email`, `telegram`, `messenger`), `search`.
+- **New job.** Action `audience_collect` with payload `{"name","query","geo","limit","target":"companies|telegram"}` and,
+  like the panel form, optional `schedule` (`once|daily|weekly`), `min_contacts` (keep collecting in new rounds up to N),
+  `check_messengers`, `depth` (1-5 pages per site), `mode` (`ai|deterministic`). It is within the plan's monthly limit:
+  `limit` and `min_contacts` are cut to what is left, and with nothing left the action is refused. Collection needs no
+  payment. Two steps as always: `propose_changes`, the owner agrees, `apply_changes`.
 
 ## Working with tasks
 
@@ -122,6 +142,19 @@ leaves them for the owner). Run, switch on or pause a task: `automation_run`, `a
   score and reason, whether it was mailed, and the run log lines about it. The owner sees the same on the task page
   («Отчёт») in the panel.
 - Every method of the REST API and the MCP tools: `references/api.md`.
+
+## Web chats and personas
+
+- A **persona** is the consultant: name, gender, avatar, title, its **role** in the owner's words (`instruction`) and its
+  **knowledge** (sources + «Вопросы и ответы»). Every chat of a persona answers from that knowledge; it is edited in the
+  panel's «Личности». `get_account().personas` shows each with its knowledge, FAQ and chat counts.
+- A chat is made in the panel form's steps: 1) a persona — an existing one or a new one (name and gender, or generated);
+  2) its role; 3) knowledge, optional. No chat name (it becomes «Чат N») and no site address are needed; a chat without
+  sources answers from a role of 40+ characters, with sources only from them.
+- Connected: one batch — `persona_create` (value «Имя Фамилия» or empty to generate, field `female|male|other`, payload =
+  the role) or `persona_instruction_replace` for an existing persona; `chat_create` (value empty, target = the persona id
+  or 0 for the one created in the batch); `source_add` / `faq_add` with target 0 for the new chat — they go to its persona.
+  File mode: a `persona` item with `knowledge`, a `web_chat` item with `persona_ref`.
 
 ## Events straight to your Claude or Codex (AI agents)
 
