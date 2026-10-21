@@ -83,12 +83,13 @@ tell the owner to restart Codex or Claude Code.
 Tools: `get_account` (chats, personas, employees, tasks with ids), `guide` (the actions and their rules — read it
 before proposing), `lookup` (what tasks did with given links), `task_status`, `task_items`, `audiences`, `audience_status`,
 `audience_rows`, `propose_changes`, `pending_changes`,
-`apply_changes`, `discard_changes`, `export`, `import`, `agent_routes`, `agent_events`, `agent_ack` (see "Events straight
+`apply_changes`, `discard_changes`, `export`, `import`, `persona_ask` (a reply written by one of the owner's personas, see
+"Web chats and personas"), `agent_routes`, `agent_events`, `agent_ack` (see "Events straight
 to your Claude or Codex").
 
 Without MCP but with the API key, the same is plain REST (`Authorization: Bearer <key>`, base
 `https://kra.name/app/api/v1`, reference https://kra.name/app/api/docs): `GET /account`, `GET /tasks/{id}`,
-`POST /lookup`, `GET /audiences`, `GET /audiences/{id}`, `GET /audiences/{id}/contacts`, `GET /guide`, `POST /changes` → `POST /changes/apply` (or `DELETE /changes`), `GET /export`,
+`POST /lookup`, `POST /personas/{id}/ask`, `GET /audiences`, `GET /audiences/{id}`, `GET /audiences/{id}/contacts`, `GET /guide`, `POST /changes` → `POST /changes/apply` (or `DELETE /changes`), `GET /export`,
 `POST /import` (dry run unless `"dry_run": false`).
 
 «Можно ли…?» — check `capabilities` (what AI Worker can and cannot do yet) and `get_account`: if it exists, say where and how
@@ -157,6 +158,13 @@ company contacts (phones, e-mails, messengers from public sites) or Telegram cha
   the role) or `persona_instruction_replace` for an existing persona; `chat_create` (value empty, target = the persona id
   or 0 for the one created in the batch); `source_add` / `faq_add` with target 0 for the new chat — they go to its persona.
   File mode: a `persona` item with `knowledge`, a `web_chat` item with `persona_ref`.
+- **Replies written by a persona, for you.** `persona_ask` (REST `POST /personas/{id}/ask`): `persona_id`, `text` (the
+  order, question or letter to answer, up to 8000 characters), optional `lang` (default — the text's language), `context`
+  (notes for this reply) and `max_chars`. The persona writes the reply with its role, «Вопросы и ответы» and the most
+  relevant pieces of its knowledge — e.g. a persona «Отклики …» with approved reply templates answers every freelance
+  order, so the templates live in one place for the owner's Codex and for AI Worker. The result is `answer`, `persona`,
+  `sources_used` (`name`, `snippet`), `model`, `tokens`. It is sent to nobody and not kept as a chat; it counts against the
+  account's AI token limit, at most 30 calls a minute. Check the facts and links in `answer` before giving it to the owner.
 
 ## Events straight to your Claude or Codex (AI agents)
 

@@ -36,6 +36,13 @@ Settings → Integrations; Business plan and above). Answers are JSON; 401 — n
 
 Личности (консультанты чатов): роль, число источников знаний (knowledge_sources), вопросов FAQ (faq) и чатов (chats); чат отвечает по базе знаний своей личности
 
+### `POST /personas/{id}/ask`
+
+Ответ, написанный личностью: её роль, «Вопросы и ответы» и база знаний (например отклик на заказ по шаблонам личности). Никуда не отправляется и не сохраняется как чат; входит в лимит токенов ИИ, не больше 30 вызовов в минуту. Перед использованием проверьте факты и ссылки.
+- `id` (path, required) — id личности этого аккаунта
+
+Body: `{"text":"string","lang":"string","context":"string","max_chars":"integer"}`, required: text
+
 ### `GET /workers`
 
 ИИ-сотрудники
@@ -225,4 +232,5 @@ Body: `{"status":"string","result":"string"}`, required: status
 
 `POST https://kra.name/app/api/mcp` (Streamable HTTP, JSON answers), the same key. Tools: get_account, guide, lookup,
 task_status, propose_changes, pending_changes, apply_changes, discard_changes, export, import, agent_routes, agent_events,
-agent_ack — the same as the REST methods above. At most 10 messages per request, 120 tool calls and 10 imports a minute.
+agent_ack — the same as the REST methods above; persona_ask (REST `POST /personas/{id}/ask`) — a reply written by one of
+the owner's personas, sent to nobody. At most 10 messages per request, 120 tool calls, 10 imports and 30 persona_ask calls a minute.
