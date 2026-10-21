@@ -278,7 +278,7 @@ Reads one element: its text, link, image, field value, HTML or any attribute. Th
 
 ### `extract` — Read fields from the page (kind: web)
 
-Reads several page fields at once into one object variable. If every field is empty the layout has changed: the run goes to the AI for repair (inside «For each» — when more than half of the pages are empty). «Optional step» — for pages that may lack these fields.
+Reads several page fields at once into one object variable. If every field is empty the layout has changed: the run goes to the AI for repair (inside «For each» — when more than half of the pages are empty). «Optional step» — for pages that may lack these fields. On a field: «canon» — the value becomes its canonical address (strips a search engine's redirect wrapper, reduces t.me/s/… and t.me/<name> to https://t.me/<name>) — for a one-off collection and «Remove duplicates» by this field; «number» — the field's text («12,345 members», «1.2K») becomes a number — the metric for sorting and filtering.
 
 | field | type | meaning |
 |---|---|---|
@@ -292,7 +292,7 @@ Reads several page fields at once into one object variable. If every field is em
 
 ### `extract_list` — Collect a list of cards (kind: web)
 
-Finds all cards (search results, chat messages, table rows) and takes fields from each one. The key is the field by which «new only» recognises the ones already seen. «Clean HTML» on a field removes tags and HTML entities; «Exclusions» drop cards whose fields contain the given text (case-insensitive). «Error if fewer cards» is for pages that always have cards (a feed, a catalogue, search results): if fewer are found, the site's layout has changed, and the AI repairs the scenario itself; the client is notified only if the repair fails. Empty — do not check (pages where an empty list is normal: new messages, results for a rare query).
+Finds all cards (search results, chat messages, table rows) and takes fields from each one. The key is the field by which «new only» recognises the ones already seen. «Clean HTML» on a field removes tags and HTML entities; «Exclusions» drop cards whose fields contain the given text (case-insensitive). «Error if fewer cards» is for pages that always have cards (a feed, a catalogue, search results): if fewer are found, the site's layout has changed, and the AI repairs the scenario itself; the client is notified only if the repair fails. Empty — do not check (pages where an empty list is normal: new messages, results for a rare query). On a field: «canon» — the value becomes its canonical address (strips a search engine's redirect wrapper, reduces t.me/s/… and t.me/<name> to https://t.me/<name>) — put it on the link field before «Remove duplicates»; «number» — the field's text becomes a number (a metric: member count, visits) — for a one-off collection's sorting and filtering.
 
 | field | type | meaning |
 |---|---|---|
@@ -363,7 +363,7 @@ With a key: header Authorization = Bearer {{secret.API_TOKEN}}, the API_TOKEN ke
 
 ### `json_list` — List from JSON (kind: web)
 
-Takes the items out of an API answer (or another variable holding JSON). “From” is the variable, “Path to the list” is where the array lies inside it (for example data.jobs; empty means the variable itself). Fields are paths inside an item, dotted, [0] is an array element: company, salary.min, tags[0]. The key is the field “only new” uses to recognise items already seen; items without a key and items that are not objects (such as a service first record) are skipped. “Clean HTML”, “Exclusions” and “Error if fewer items than” work as in “Collect a list of cards”: fewer items means the answer's format changed, and the AI repairs the scenario itself.
+Takes the items out of an API answer (or another variable holding JSON). “From” is the variable, “Path to the list” is where the array lies inside it (for example data.jobs; empty means the variable itself). Fields are paths inside an item, dotted, [0] is an array element: company, salary.min, tags[0]. The key is the field “only new” uses to recognise items already seen; items without a key and items that are not objects (such as a service first record) are skipped. “Clean HTML”, “Exclusions”, “Error if fewer items than”, «canon» and «number» on a field work as in “Collect a list of cards”: fewer items means the answer's format changed, and the AI repairs the scenario itself.
 
 | field | type | meaning |
 |---|---|---|

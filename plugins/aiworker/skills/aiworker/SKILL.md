@@ -84,8 +84,16 @@ Tools: `get_account` (chats, personas, employees, tasks with ids), `guide` (the 
 before proposing), `lookup` (what tasks did with given links), `task_status`, `task_gallery` (ready tasks), `task_items`, `audiences`, `audience_status`,
 `audience_rows`, `propose_changes`, `pending_changes`,
 `apply_changes`, `discard_changes`, `export`, `import`, `persona_ask` (a reply written by one of the owner's personas, see
-"Web chats and personas"), `agent_routes`, `agent_events`, `agent_ack` (see "Events straight
+"Web chats and personas"), `desktop_link` (see below), `agent_routes`, `agent_events`, `agent_ack` (see "Events straight
 to your Claude or Codex").
+
+**The employee's desktop.** `desktop_link` with `worker_id` or `task_id` (the computer of the task's current run, else of
+its employee; neither — the only employee) returns `{url, expires_at, node, note}`: a one-time link to the desktop (noVNC) of
+the AI employee's computer, valid 10 minutes, opens once. Call it **only when the owner himself asks** to open the desktop
+or to see what the employee is doing; give the link to the owner only, never send it to anyone else, and ask for a new one
+rather than reusing an old one. It is refused for a shared pool computer (other clients' employees work there too), when
+the plan does not include the desktop, and for another account's computer. MCP only (no REST method); an app connected
+with the «chat» scope does not have it.
 
 Without MCP but with the API key, the same is plain REST (`Authorization: Bearer <key>`, base
 `https://kra.name/app/api/v1`, reference https://kra.name/app/api/docs): `GET /account`, `GET /tasks/{id}`,
@@ -162,6 +170,12 @@ company contacts (phones, e-mails, messengers from public sites) or Telegram cha
   the role) or `persona_instruction_replace` for an existing persona; `chat_create` (value empty, target = the persona id
   or 0 for the one created in the batch); `source_add` / `faq_add` with target 0 for the new chat — they go to its persona.
   File mode: a `persona` item with `knowledge`, a `web_chat` item with `persona_ref`.
+- **The chat in the owner's Telegram bot** (ADR 111). A chat also answers in a Telegram bot the owner makes in @BotFather
+  (`/newbot` → a token like `123456789:AA…`): the same persona, knowledge, leads, ratings and plan limits; every Telegram
+  user is a dialog of the chat. Connected mode: `chat_channel_telegram_connect` — target = the chat id, value = the token
+  (the server takes it out at once: it never comes back, nor appears in pending changes or the log; never repeat it);
+  `chat_channel_disconnect` — field `telegram`. `get_account().chats[].channels` shows the bot (@username, link, status),
+  never its token. One bot serves one chat. Messenger, Instagram, WhatsApp and Viber come later.
 - **Replies written by a persona, for you.** `persona_ask` (REST `POST /personas/{id}/ask`): `persona_id`, `text` (the
   order, question or letter to answer, up to 8000 characters), optional `lang` (default — the text's language), `context`
   (notes for this reply) and `max_chars`. The persona writes the reply with its role, «Вопросы и ответы» and the most
@@ -232,6 +246,26 @@ prompt goes on stdin), takes the exit code and the last lines of the output and 
 **Never resume a session that is open in an app at the same time** — two processes in one session break each other; for
 the background, use a separate session or `new`. Several listeners of one route never get the same event.
 
+## Account alerts (ADR 109)
+
+Problems the owner should hear about — AI token limits at 80%/100%, the paid period ending in 3 or 1 days or already over,
+autorenewal that failed, a task run that failed or needs a sign-in, two runs in a row that found nothing, a delivery that
+did not go out, a channel (WhatsApp/Telegram) logged out, a node that stopped answering — raise an **account alert**.
+Every unseen `warning`/`critical` alert rides the result of your **next** MCP call, once (`account_alerts`, next to
+`developer_answers` if that is riding too) — **as soon as you see `account_alerts`, tell the owner at once, briefly, and
+offer the fitting action** (renew the subscription, sign in, fix the task). The `alerts` tool lists the open alerts and
+those resolved in the last 7 days, any time you want the fuller picture. An alert resolves itself once its cause is gone
+(a successful run, a payment, a sign-in) — you never close one yourself.
+
+A route can also be marked to receive alerts (panel «ИИ-агенты» toggle «Присылать сюда предупреждения аккаунта», or
+`agent_route_create` / `agent_route_update` with `"alerts": true`): it then gets every alert as its own event
+(`agent_events` with `source: "alerts"`), with `kind`, `severity`, `text` and the panel link in its data. **If the route
+has no instruction of its own, the default is cautious on purpose: tell the owner with a notification; never spend money
+or do anything irreversible without the owner's own answer.** A route's own instruction, when set, always wins.
+
+The `chat` OAuth scope (the WordPress plugin) sees only alerts about online chats and AI tokens — never a task or
+subscription alert; everything else behaves the same for it.
+
 ## Good tasks
 
 - One task = one recurring job. Put each source and how to read it into `goal` ("1) freelancehunt.com/projects —
@@ -246,6 +280,15 @@ the background, use a separate session or `new`. Several listeners of one route 
 - Results go to the owner by mail by default. A chain (one task's results become another's input) is
   `deliver_to_refs` on the source; the target then reads the list `events`.
 - An API source (JSON) is faster and steadier than a page: if the site has a public API, say so in `goal`.
+- **A one-off research collection** ("find at least 100 Telegram groups of seafarers with their member count, sorted"),
+  not a recurring watch: say the target count in `goal` ("find at least 100 …", "collect a list of …") or set
+  `params.research: {"target_count": 100, "sort_by": "participants"}` directly. The AI then writes several queries with
+  pagination to the target instead of one page of 20, dedupes candidates by their canonical address, and reads the
+  metric off each candidate's own page (not the search result's snippet) — `references/program-steps.md`'s `extract`
+  and `extract_list` fields take `canon` (the field becomes a canonical URL — a search engine's redirect unwrapped, a
+  Telegram link reduced to `https://t.me/<name>`) and `number` (the field's human-written count — "12 345 members",
+  "1.2K" — becomes a whole number) for exactly this. The task keeps running itself, picking up where it left off, until
+  it reaches `target_count`; `task_status` shows how many were collected so far.
 
 ## Files in this skill
 

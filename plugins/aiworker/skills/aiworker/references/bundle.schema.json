@@ -697,7 +697,9 @@
                                             "target": {
                                                 "enum": [
                                                     "companies",
-                                                    "telegram"
+                                                    "telegram",
+                                                    "communities",
+                                                    "listings"
                                                 ]
                                             },
                                             "check_messengers": {

@@ -146,6 +146,7 @@ Body: `[]`
 - `to` (query)
 - `has` (query) — через запятую: phone, email, telegram, messenger
 - `search` (query)
+- `sort` (query) — metric — по численности (участники/подписчики/посещаемость) от большей, пустая метрика всегда внизу
 - `include_disabled` (query)
 - `without_do_not_contact` (query)
 - `limit` (query)
@@ -274,4 +275,4 @@ Body: `{"status":"string","result":"string"}`, required: status
 `POST https://kra.name/app/api/mcp` (Streamable HTTP, JSON answers), the same key. Tools: get_account, guide, lookup,
 task_status, task_gallery, propose_changes, pending_changes, apply_changes, discard_changes, export, import, agent_routes, agent_events,
 agent_ack — the same as the REST methods above; persona_ask (REST `POST /personas/{id}/ask`) — a reply written by one of
-the owner's personas, sent to nobody. At most 10 messages per request, 120 tool calls, 10 imports and 30 persona_ask calls a minute.
+the owner's personas, sent to nobody; desktop_link (MCP only) — a one-time link, 10 minutes, to an AI employee's desktop. At most 10 messages per request, 120 tool calls, 10 imports and 30 persona_ask calls a minute.
