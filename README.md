@@ -36,7 +36,7 @@ Two ways to work:
    a contact collection, a dialog scenario. You import it in the panel: *AI employee tasks → Import*. The file is
    checked first; nothing is created until you press *Import*. Any plan.
 2. **Connected (MCP).** The AI works with your account like the panel's setup wizard: it sees your chats and tasks,
-   proposes changes and applies them only after you agree. Needs an API key (Business plan and above).
+   proposes changes and applies them only after you agree. Needs an API key (any paid plan; the REST API itself is Business and above).
 
 ## Install
 
@@ -206,7 +206,7 @@ Codex или Claude настраивать аккаунт AI Worker по ваш�
    контактов, сценарий диалогов. Вы загружаете его в панели: «Задания ИИ-сотрудникам» → «Импорт». Файл сначала
    проверяется, ничего не создаётся до кнопки «Импортировать». На любом тарифе.
 2. **Подключение (MCP).** ИИ работает с аккаунтом, как мастер настройки панели: видит чаты и задания, предлагает
-   изменения и применяет их только после вашего согласия. Нужен API-ключ (с тарифа «Бизнес»).
+   изменения и применяет их только после вашего согласия. Нужен API-ключ (на любом оплаченном тарифе; сам REST API — с тарифа «Бизнес»).
 
 ## Установка
 

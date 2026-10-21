@@ -59,7 +59,7 @@ the old one — or use connected mode, which changes things in place.
 ## Connected mode (MCP)
 
 The account is an MCP server: `https://kra.name/app/api/mcp`, header `Authorization: Bearer <API key>` (panel →
-Настройки → Интеграции; the API is on the Business plan and above). Setup:
+Настройки → Интеграции; MCP works on every paid plan, the REST API on Business and above). Setup:
 
 If the owner says the key is in a file (usually `~/Downloads/aiworker-key.txt` from «Скачать файлом» in the panel),
 never print it, `cat` it into your answer or paste it into a command line you show: move it with the shell, e.g.
