@@ -91,8 +91,10 @@ Without MCP but with the API key, the same is plain REST (`Authorization: Bearer
 `POST /lookup`, `GET /audiences`, `GET /audiences/{id}`, `GET /audiences/{id}/contacts`, `GET /guide`, `POST /changes` → `POST /changes/apply` (or `DELETE /changes`), `GET /export`,
 `POST /import` (dry run unless `"dry_run": false`).
 
-Something the account cannot do (no action or tool fits): do not just refuse — call `request_feature` with a detailed
-description in the owner's words; it reaches the developers at once. Tell the owner «Сейчас этого сделать нельзя, но я
+«Можно ли…?» — check `capabilities` (what AI Worker can and cannot do yet) and `get_account`: if it exists, say where and how
+or offer to set it up. If it does not exist or you are not sure, say so and ask «Хотите, отправлю заявку разработчикам?»; on yes —
+`request_feature`. When the owner plainly says he needs something that does not exist, do not ask: call `request_feature`
+with a detailed description in the owner's words; it reaches the developers at once. Tell the owner «Сейчас этого сделать нельзя, но я
 отправил заявку на разработку (номер). Сообщу, когда её сделают». The developers' answer comes by itself with the result of your next AI Worker
 call (`developer_answers`, once): tell the owner right away and, if it is done, offer to do what he asked.
 `feature_requests` (REST `GET /feature-requests`) lists the requests with their status and answers.
