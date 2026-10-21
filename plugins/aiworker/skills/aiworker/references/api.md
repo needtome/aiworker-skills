@@ -188,6 +188,47 @@ Body: `{"text":"string","takeover":"boolean"}`, required: text
 
 Подпись каждого вебхука: заголовок X-Signature-Timestamp (unix-время, секунды) и X-AIWorker-Signature-V2 = "sha256=" + HMAC-SHA256(X-Signature-Timestamp + "." + тело запроса) секретом из панели. Сравнивайте подпись за постоянное время и отклоняйте запрос, если метка времени отличается от текущего времени больше чем на 5 минут: так перехваченный запрос нельзя повторить. Устаревший заголовок X-AIWorker-Signature (HMAC только тела, без метки времени) пока отправляется для совместимости и будет убран.
 
+## Плагин WordPress
+
+Мастер настройки и статистика онлайн-чатов в админке плагина AI Worker Chat. Вход — OAuth 2.1 + PKCE со scope=chat (регистрация POST /app/api/oauth/register, затем /app/oauth/authorize): токен открывает только онлайн-чаты, личности, FAQ, базу знаний, статистику и расход токенов ИИ; задания, ИИ-сотрудники, мессенджеры, оплата и ключи ему закрыты. Подходит и API-ключ.
+
+### `GET /plugin/me`
+
+Аккаунт, тариф, онлайн-чаты (сайты, личность) и доступность мастера
+- `lang` (query)
+
+### `GET /plugin/assistant`
+
+Текущий разговор с мастером настройки (тот же, что в панели у того, кто подключил сайт); новый начинается с приветствия по состоянию чата
+- `chat_id` (query) — чат в фокусе мастера / статистики
+
+### `POST /plugin/assistant/ask`
+
+Запрос мастеру своими словами; он может предложить изменения (pending). С доступом chat — только онлайн-чат, личности, FAQ, база знаний, заявка разработчикам. 20 запросов в минуту на аккаунт, токены ИИ — как в панели
+
+Body: `{"text":"string","chat_id":"integer"}`, required: text
+
+### `POST /plugin/assistant/apply`
+
+Применить ожидающие изменения (каждое проверяется ещё раз)
+
+### `POST /plugin/assistant/discard`
+
+Отменить ожидающие изменения
+
+### `POST /plugin/assistant/clear`
+
+Очистить разговор (начнётся с приветствия)
+- `chat_id` (query) — чат в фокусе мастера / статистики
+
+### `GET /plugin/stats`
+
+Статистика онлайн-чатов за период, токены ИИ аккаунта и счётчики тарифа
+- `chat_id` (query) — чат в фокусе мастера / статистики
+- `period` (query) — month — с 1-го числа текущего месяца
+- `from` (query)
+- `to` (query)
+
 ## ИИ-агенты
 
 События аккаунта для вашего Claude Code или Codex (ADR 102). Слушатель aiworker-listen.mjs на вашем компьютере ждёт сигнал (long-poll OMS по адресу wake.url маршрута) и забирает события этим методом; агент отмечает событие через MCP agent_ack или POST /agent/events/{id}/ack. Публичный адрес маршрута для CRM — в панели, «ИИ-агенты».
@@ -231,6 +272,6 @@ Body: `{"status":"string","result":"string"}`, required: status
 ## MCP server
 
 `POST https://kra.name/app/api/mcp` (Streamable HTTP, JSON answers), the same key. Tools: get_account, guide, lookup,
-task_status, propose_changes, pending_changes, apply_changes, discard_changes, export, import, agent_routes, agent_events,
+task_status, task_gallery, propose_changes, pending_changes, apply_changes, discard_changes, export, import, agent_routes, agent_events,
 agent_ack — the same as the REST methods above; persona_ask (REST `POST /personas/{id}/ask`) — a reply written by one of
 the owner's personas, sent to nobody. At most 10 messages per request, 120 tool calls, 10 imports and 30 persona_ask calls a minute.

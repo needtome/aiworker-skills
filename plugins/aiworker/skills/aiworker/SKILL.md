@@ -81,7 +81,7 @@ tell the owner to restart Codex or Claude Code.
   ```
 
 Tools: `get_account` (chats, personas, employees, tasks with ids), `guide` (the actions and their rules — read it
-before proposing), `lookup` (what tasks did with given links), `task_status`, `task_items`, `audiences`, `audience_status`,
+before proposing), `lookup` (what tasks did with given links), `task_status`, `task_gallery` (ready tasks), `task_items`, `audiences`, `audience_status`,
 `audience_rows`, `propose_changes`, `pending_changes`,
 `apply_changes`, `discard_changes`, `export`, `import`, `persona_ask` (a reply written by one of the owner's personas, see
 "Web chats and personas"), `agent_routes`, `agent_events`, `agent_ack` (see "Events straight
@@ -132,6 +132,10 @@ company contacts (phones, e-mails, messengers from public sites) or Telegram cha
 - **Create.** File mode: a `task` item (see `references/bundle-format.md`). Connected: action `automation_create` with the
   payload from `guide`. AI Worker's own AI then opens the sites, writes the scenario and shows it to the owner; a task
   with a scenario from a file waits «на проверке» until the owner switches it on (`automation_activate`).
+- **From the gallery.** `task_gallery` lists ready tasks (freelance orders, remote jobs, Prozorro tenders, OLX, Facebook
+  group posts and join requests, Telegram keyword monitoring, reviews, competitor prices…) with the fields the owner
+  fills and how many tasks the plan still allows. Take one with `automation_create` and the payload
+  `{"gallery": "<slug>", "gallery_values": {…}}`; `goal` / `criteria` in that payload are corrections added to the item's.
 - **Edit.** `automation_update` with only the fields that change. What fits (`criteria`), the schedule, where results go,
   the threshold and the name never rewrite the scenario. A new goal or other sites do: add `"reauthor": true` (or
   `automation_targets_add` / `automation_targets_remove` for sites and groups). Run now — `automation_run`; pause —
@@ -165,6 +169,12 @@ company contacts (phones, e-mails, messengers from public sites) or Telegram cha
   order, so the templates live in one place for the owner's Codex and for AI Worker. The result is `answer`, `persona`,
   `sources_used` (`name`, `snippet`), `model`, `tokens`. It is sent to nobody and not kept as a chat; it counts against the
   account's AI token limit, at most 30 calls a minute. Check the facts and links in `answer` before giving it to the owner.
+- **The WordPress plugin (AI Worker Chat)** connects to the account by OAuth with `scope=chat`: its admin shows the same
+  setup wizard and the chat statistics (`/app/api/v1/plugin/*`, see `/app/api/docs`). A `chat` token reaches only the chats,
+  personas, FAQ, knowledge and feature requests — on `/api/mcp` it lists `get_account`, `guide`, the `*_changes` tools,
+  `capabilities` and the feature-request tools; actions outside `chat_*`, `persona_*`, `faq_*`, `source_add`,
+  `feature_request` are refused. If the owner asks you for a task through such a connection, tell him to use the panel
+  or connect you with the API key.
 
 ## Events straight to your Claude or Codex (AI agents)
 
