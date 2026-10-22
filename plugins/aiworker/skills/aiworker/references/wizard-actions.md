@@ -26,7 +26,7 @@ on apply.
 - `automation_update` — Изменить задание
 - `automation_targets_add` — Добавить сайты или группы в задание
 - `automation_targets_remove` — Убрать сайты или группы из задания
-- `audience_collect` — Собрать в интернете контакты, Telegram-каналы, сообщества/форумы или площадки (аудитория)
+- `audience_collect` — Собрать в интернете контакты, Telegram-каналы или группы (kinds: только группы / только каналы), сообщества/форумы (platforms: только группы Facebook, профили Instagram, форумы…) или площадки (аудитория)
 - `audience_start` — Запустить или продолжить сбор контактов (аудитория из context.audiences)
 - `audience_pause` — Поставить сбор контактов на паузу
 - `audience_finish` — Завершить сбор контактов сейчас (собранное остаётся)
@@ -38,6 +38,7 @@ on apply.
 - `automation_archive` — Убрать задание в архив (не запускается и не считается в лимите тарифа; найденное и отчёты остаются)
 - `automation_unarchive` — Вернуть задание из архива (на паузе, включить — automation_activate)
 - `automation_secret_set` — Сохранить ключ API, который владелец прислал в чат, в «Ключи доступа» задания
+- `account_secret_set` — Сохранить ключ API, который владелец прислал в чат, в «Ключи и доступы» аккаунта (для всех заданий)
 - `chat_channel_telegram_connect` — Подключить к онлайн-чату Telegram-бота владельца (токен из BotFather): чат отвечает и в Telegram
 - `chat_channel_disconnect` — Отключить канал онлайн-чата (Telegram-бота)
 - `agent_route_create` — Создать маршрут ИИ-агента: события аккаунта сразу в Claude Code или Codex владельца

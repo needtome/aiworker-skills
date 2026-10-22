@@ -275,4 +275,4 @@ Body: `{"status":"string","result":"string"}`, required: status
 `POST https://kra.name/app/api/mcp` (Streamable HTTP, JSON answers), the same key. Tools: get_account, guide, lookup,
 task_status, task_gallery, propose_changes, pending_changes, apply_changes, discard_changes, export, import, agent_routes, agent_events,
 agent_ack — the same as the REST methods above; persona_ask (REST `POST /personas/{id}/ask`) — a reply written by one of
-the owner's personas, sent to nobody; desktop_link (MCP only) — a one-time link, 10 minutes, to an AI employee's desktop. At most 10 messages per request, 120 tool calls, 10 imports and 30 persona_ask calls a minute.
+the owner's personas, sent to nobody; desktop_link (MCP only) — a one-time link, 10 minutes, to an AI employee's desktop; browser_targets, browser_open, browser_command, browser_status, browser_release (MCP only) — explicit dedicated server browser for public sites with a per-session domain scope and read-only or interactive policy; LinkedIn Jobs/Posts remain read-only for now; no Firefox. At most 10 messages per request, 120 tool calls, 10 imports and 30 persona_ask calls a minute.

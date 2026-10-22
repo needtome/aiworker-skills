@@ -361,6 +361,65 @@ Calls the API of the task's site directly, with no browser and no page: address,
 
 With a key: header Authorization = Bearer {{secret.API_TOKEN}}, the API_TOKEN key in the task's “Access keys”.
 
+### `tgstat` — TGStat API (kind: web)
+
+Ищет каналы или чаты через Stat API, читает их статистику либо ищет публикации через отдельный Search API. Ключ берётся из «Настройки → TGStat API»: свой либо ключ платформы, если администратор задал месячный лимит. Бесплатный Stat API читает статистику только собственных подтверждённых каналов; поиск каналов требует Stat S+. Для поиска каналов через API укажите страну; без страны используйте открытый мировой каталог в сборе аудиторий. Один запрос ключом платформы на вид API за запуск.
+
+| field | type | meaning |
+|---|---|---|
+| `action` | choice | What to do — one of: `channels_search` (Поиск каналов и чатов), `channel_stat` (Статистика канала/чата), `posts_search` (Поиск публикаций) |
+| `source` | choice | Чей ключ — one of: `auto` (Свой, затем платформы), `own` (Только свой), `service` (Платформы (если есть квота)) |
+| `query` | s | Search phrase — e.g. `{{params.query}}` |
+| `channel` | s | Канал/чат для статистики — e.g. `{{item.telegram}}` |
+| `country` | s | Код страны (обязателен для поиска каналов) — e.g. `ua` |
+| `peer_type` | choice | Type — one of: `all` (каналы и чаты), `channel` (каналы), `chat` (чаты) |
+| `limit` | n | At most — e.g. `20` |
+| `into` | s | Save to variable — e.g. `tgstat` |
+
+```json
+{"op":"tgstat","action":"channels_search","source":"auto","query":"{{params.query}}","country":"ua","peer_type":"all","limit":20,"into":"tgstat"}
+```
+
+В ответе — объект TGStat. Для каналов: «Список из JSON» с from=tgstat, path=response.items, key=username.
+
+### `telemetr` — Telemetr API (kind: web)
+
+Официальный API Telemetr: поиск каналов или групп по названию и описанию, расширенный каталог (при наличии доступа) или статистика по internal_id. Ключ задаётся в «Настройки → Telemetr API». Страна необязательна: без неё поиск идёт по всему миру. API возвращает внутренние ID; ссылку t.me берите отдельным запросом информации о канале. Бесплатный ключ ограничен подтверждёнными каналами, каталог требует Advanced/Team либо отдельное разрешение.
+
+| field | type | meaning |
+|---|---|---|
+| `action` | choice | What to do — one of: `channels_search` (Поиск каналов и групп), `catalog_search` (Расширенный каталог), `channel_info` (Карточка и ссылка t.me), `channel_stat` (Статистика канала/группы) |
+| `source` | choice | Чей ключ — one of: `auto` (Свой, затем платформы), `own` (Только свой), `service` (Платформы (если есть квота)) |
+| `query` | s | Search phrase — e.g. `{{params.query}}` |
+| `channel` | s | Внутренний ID для карточки или статистики — e.g. `{{item.internal_id}}` |
+| `country` | s | Страна (ID из справочника, пусто — весь мир) — e.g. `ukraine` |
+| `peer_type` | choice | Type — one of: `channel` (каналы), `group` (группы) |
+| `limit` | n | At most — e.g. `20` |
+| `into` | s | Save to variable — e.g. `telemetr` |
+
+```json
+{"op":"telemetr","action":"channels_search","source":"own","query":"{{params.query}}","peer_type":"channel","limit":20,"into":"telemetr"}
+```
+
+В поиске ответ — массив с internal_id, title, members_count и peer. «Список из JSON»: from=telemetr, key=internal_id. Затем по internal_id используйте «Карточка и ссылка t.me». В каталоге массив находится в items.
+
+### `apify` — Apify: community search (kind: web)
+
+Runs one of two paid Actors using your token from Settings → Apify API: Facebook groups or Instagram profiles. Returns an array of cards. Apify bills separately from your AI Worker plan. Up to 50 results and $0.50 per Actor run; each Actor runs at most once per task execution. Preview skips this paid step.
+
+| field | type | meaning |
+|---|---|---|
+| `actor` | choice | Source — one of: `facebook_groups` (Facebook groups), `instagram_profiles` (Instagram profiles) |
+| `query` | s | Search phrase — e.g. `{{params.query}}` |
+| `limit` | n | Maximum results (1–50) — e.g. `20` |
+| `into` | s | Save to variable — e.g. `apify` |
+
+```json
+{"op":"apify","actor":"facebook_groups","query":"{{params.query}}","limit":20,"into":"apify"}
+```
+
+Add the key once in Settings → Apify API. JSON list: from=apify, key=url. Apify may charge again on repeated runs.
+
 ### `json_list` — List from JSON (kind: web)
 
 Takes the items out of an API answer (or another variable holding JSON). “From” is the variable, “Path to the list” is where the array lies inside it (for example data.jobs; empty means the variable itself). Fields are paths inside an item, dotted, [0] is an array element: company, salary.min, tags[0]. The key is the field “only new” uses to recognise items already seen; items without a key and items that are not objects (such as a service first record) are skipped. “Clean HTML”, “Exclusions”, “Error if fewer items than”, «canon» and «number» on a field work as in “Collect a list of cards”: fewer items means the answer's format changed, and the AI repairs the scenario itself.
@@ -553,6 +612,32 @@ Channels from the «Telegram channels» collection in the «Audiences» section.
 ```json
 {"op":"audience_fetch","into":"found"}
 ```
+
+## YouTube
+
+### `youtube` — YouTube (kind: common)
+
+YouTube videos and channels through the official YouTube Data API v3 — no browser, no captcha: search for videos and channels, new videos of channels, video and channel statistics, comments on a video. Every element has title, url, channel, channel_url, published_at, views, likes, comments, subscribers, description (a channel also has videos, country, links and emails from its description); its key is url — ready for «For each» with «only new», «AI judges» and «Save». Key: your own YOUTUBE_API_KEY in the task's «Access keys» (your own Google quota) or the platform's key with a daily limit by plan; when the limit is spent, the step stops the run with the error «today's YouTube quota is spent» instead of an empty list. New videos of a channel without a key (or with the RSS mark) are read from the channel's RSS feed: the last ~15 videos, without views and likes. A repeated request within a day (a search — 6 hours) comes from the cache and spends no quota. Search has its own Google quota, 100 requests a day for the whole platform: search rarely, and take new videos of known channels with the channel_videos action.
+
+| field | type | meaning |
+|---|---|---|
+| `action` | choice | What to do — one of: `search_videos` (find videos), `search_channels` (find channels), `channel_videos` (new videos of a channel), `video_stats` (video statistics), `channel_stats` (channel statistics), `comments` (comments on a video) |
+| `query` | s | Query (for a search) — e.g. `{{params.query}} or coffee machine review` |
+| `channel` | s | Channels: UC… id, @handle or link, several separated by commas — e.g. `@mkbhd, UCBJycsmduvYEL83R_U4JriQ` |
+| `video` | s | Video: id or link (for statistics — several separated by commas) — e.g. `https://youtu.be/dQw4w9WgXcQ` |
+| `limit` | n | At most (up to 200) — e.g. `25` |
+| `order` | choice | Order — one of: `relevance` (by relevance), `date` (newest first), `viewCount` (by views), `rating` (by rating), `videoCount` (by number of videos (channels)) |
+| `published_after` | s | Not earlier than (a date or a number of days back) — e.g. `7d or 2026-10-01` |
+| `region` | s | Country (ISO, for a search) — e.g. `UA` |
+| `lang` | s | Language (ISO, for a search) — e.g. `uk` |
+| `rss` | b | Through the channel's RSS (no key, no statistics) |
+| `into` | s | Save to variable — e.g. `items` |
+
+```json
+{"op":"youtube","action":"channel_videos","channel":"{{params.channels}}","published_after":"7d","limit":30,"into":"items"}
+```
+
+Google quota: channels / videos / playlistItems / commentThreads — 1 unit a request of up to 50 ids (10,000 units a day per project), search.list — its own quota of 100 calls a day. The day starts at midnight Pacific Time.
 
 ## Execution order
 
