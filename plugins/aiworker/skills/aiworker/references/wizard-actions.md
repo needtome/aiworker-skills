@@ -6,10 +6,53 @@ on apply.
 
 - `persona_instruction_append` — Дополнить инструкцию личности
 - `persona_instruction_replace` — Заменить инструкцию личности
+- `plan_recommend` — Рекомендовать один активный тариф ИИ-сотрудника: plan — код тарифа из context.worker_interview.plans, reason — короткая причина по ответам владельца; тариф не оплачивается автоматически
 - `persona_field` — Изменить имя, фамилию, пол или должность личности
 - `persona_create` — Создать личность (консультанта)
+- `revision_restore` — Восстановить ревизию задания, коллекции или личности
+- `persona_block_set` — Добавить или изменить обязательный блок ответов личности (persona_ask): field — имя блока, payload — JSON блока
+- `persona_block_remove` — Убрать обязательный блок ответов личности: field — имя блока
+- `server_add` — Предложить подключение сервера для аудита: payload JSON {"host","port","user","name"}; private key создаётся и хранится зашифрованным
+- `server_test` — Предложить проверку SSH-подключения: target — id своего сервера из server list
+- `server_audit_run` — Предложить запуск только чтения по активному перечню: target — id своего сервера
+- `server_fix_propose` — Подготовить точный план исправления выбранных находок: target — id прогона, payload JSON {"finding_ids":[...],"safe_only":true|false}
+- `server_fix_apply` — Предложить применение ранее показанного плана: target — id предложения. MCP не может подтверждать высокорисковые пункты; владелец отдельно отмечает каждый такой пункт на странице аудита сервера.
+- `server_fix_rollback` — Предложить откатить подтверждённые исправления из резервных копий: target — id предложения
 - `worker_instruction_append` — Дополнить инструкцию ИИ-сотрудника
 - `worker_instruction_replace` — Заменить инструкцию ИИ-сотрудника
+- `attention_hide` — Скрыть строки с требующими внимания диалогами или вопросами: target — id ИИ-сотрудника, payload — JSON {"all":true} либо {"items":["c:<conversation_id>","q:<question_id>"]} из attention_items
+- `wizard_save` — Сохранить шаг мастера первого запуска: target — id ИИ-сотрудника или 0, field — step1|step2|step3|step4|step5, payload — поля шага; step5 запускает сотрудника после подтверждения
+- `worker_pause` — Поставить ИИ-сотрудника на паузу или возобновить: target — id сотрудника, value — pause|resume
+- `worker_update` — Изменить настройки ИИ-сотрудника кроме инструкции: target — id сотрудника, payload — JSON полей из panel_settings; инструкцию меняй отдельным worker_instruction_append/replace
+- `worker_features` — Изменить набор включённых функций ИИ-сотрудника: target — id сотрудника, payload — JSON {"on":["telegram","browser",…]} из panel_settings.features
+- `worker_identity` — Сгенерировать и назначить новую личность ИИ-сотруднику: target — id сотрудника; старая личность остаётся в аккаунте
+- `tenant_storage` — Изменить место хранения файлов аккаунта: payload — JSON {"mode":"off|files|core_data","node_id":ID|null,"region_label":"…"}; узел должен быть подключённым BYOS-узлом этой компании
+- `invite` — Пригласить коллегу в аккаунт: payload — JSON {"name":"…","email":"…","role":"owner|manager|moderator"}; письмо отправится после apply_changes
+- `notification_preferences` — Изменить настройки уведомлений: field user с payload {"prefs":{"tg_draft":true,…}} (неуказанные переключатели сохраняют прежнее значение) или field webhook с payload {"url":"https://…","events":[…]}; URL вебхука никогда не возвращается
+- `notification_test` — Отправить тестовое событие на уже настроенный webhook аккаунта; target не нужен, URL и ответное тело не возвращаются
+- `brand_style_set` — Сохранить стиль бренда компании: payload — JSON с description, colors, fonts, logo_url, tone, signature, legal_footers, button_style и do_dont
+- `brand_style_detect_from_site` — Определить стиль бренда по публичному сайту как черновое предложение: target — id ИИ-сотрудника, payload — JSON {"url":"https://…"}; применить предложенный стиль отдельным brand_style_set
+- `mailing_template_create` — Создать черновик шаблона рассылки: target — id ИИ-сотрудника, payload — JSON {"name","brief","source_text","variants"}
+- `mailing_template_generate` — Сгенерировать или переделать варианты шаблона: target — id ИИ-сотрудника, payload — JSON {"name","brief","source_text","instruction","template_id"?}
+- `mailing_image_generate` — Создать платное изображение для шаблона рассылки: target — id шаблона, payload — JSON {"brief","aspect"?,"placement"?}; перед применением покажи стоимость
+- `mailing_template_update` — Изменить черновик или готовый шаблон: target — id шаблона, payload — JSON {"name","brief","source_text","variants","selected_variants","status"}
+- `mailing_template_archive` — Переместить шаблон рассылки в архив без удаления: target — id шаблона
+- `mailing_template_restore` — Восстановить ревизию шаблона как новую ревизию: target — id шаблона, field — номер ревизии
+- `mailing_revision_restore` — Восстановить ревизию стиля бренда или шаблона как новую ревизию: target — id объекта, field — номер ревизии, payload — JSON {"entity_type":"brand|template"}
+- `deck_create` — Создать черновик презентации без отправки: target — id ИИ-сотрудника или 0, payload — JSON {"name","goal"?,"audience"?,"presentation_type":"speaker|reading|commercial_offer"?,"presentation_template_id"?,"slides"?}; тип по умолчанию speaker
+- `deck_generate` — Предложить генерацию или переделку презентации: сначала установи цель, аудиторию и тип (speaker по умолчанию; reading — без докладчика; commercial_offer — продающее предложение), выводи только то, что подтверждает контекст, иначе задай один короткий вопрос. payload — JSON {"name"?,"brief"?,"goal"?,"audience"?,"presentation_type"?,"source_text"?,"knowledge_source_id"?,"presentation_template_id"?,"presentation_id"?,"instruction"?}; применить только после согласия владельца
+- `deck_image_generate` — Создать платное изображение для слайда: target — id презентации, payload — JSON {"brief","aspect"?,"placement"?}; перед применением покажи стоимость
+- `deck_update` — Изменить слайды, цель, аудиторию, тип или статус презентации: target — id презентации, payload — JSON {"name"?,"goal"?,"audience"?,"presentation_type":"speaker|reading|commercial_offer"?,"status":"draft|ready","slides"?,"presentation_template_id"?}
+- `deck_regenerate_slide` — Переделать один слайд по инструкции: target — id презентации, field — номер слайда начиная с 1, payload — JSON {"instruction":"…"}
+- `deck_archive` — Переместить презентацию в архив без удаления: target — id презентации
+- `deck_restore` — Восстановить ревизию презентации как новую: target — id презентации, field — номер ревизии
+- `deck_export_pdf` — Предложить экспорт презентации в PDF: target — id презентации; файл появится после подтверждённого apply_changes
+- `deck_export_pptx` — Предложить экспорт презентации в редактируемый PPTX: target — id презентации; файл появится после подтверждённого apply_changes
+- `locale` — Изменить язык панели владельца: value — ru|en|uk
+- `size` — Изменить размер интерфейса панели владельца: value — compact|default|large
+- `channel_account_connect` — Подключить собственный номер сотрудника: target — id сотрудника, field — whatsapp|telegram|imo|max, value — номер телефона; после применения вернуть ссылку на панель для входа по QR или коду
+- `platform_number_order` — Заказать номер AI Worker за $5/мес. за номер: target — id сотрудника, payload — JSON {"channels":["telegram","whatsapp"]}; один номер можно использовать в нескольких выбранных каналах; перед применением показать outreach_warning и получить number_order_acknowledgement
+- `platform_number_cancel` — Отменить платный номер AI Worker и будущие начисления: target — id platform_number_addon из channel_accounts; постоянные бесплатные номера отменить нельзя
 - `faq_add` — Добавить вопрос в FAQ
 - `faq_update` — Изменить вопрос FAQ
 - `faq_delete` — Удалить вопрос FAQ
@@ -20,17 +63,33 @@ on apply.
 - `chat_appearance` — Вид чата
 - `chat_leads` — Заявки из чата
 - `chat_enabled` — Включить или выключить чат
-- `source_add` — Добавить сайт или страницу в базу знаний
+- `chat_site_add` — Разрешить чату работать на сайте: добавить домен в «Разрешённые сайты» (value — домен или адрес сайта, *.example.com — со всеми поддоменами)
+- `chat_site_remove` — Убрать сайт из «Разрешённых сайтов» чата (value — домен)
+- `source_add` — Добавить в базу знаний сайт, страницу, Google Таблицу или Google Документ (field: site|url|gsheet|gdoc)
 - `chat_create` — Создать онлайн-чат
 - `automation_create` — Создать задание на сайте или в Telegram
 - `automation_update` — Изменить задание
 - `automation_targets_add` — Добавить сайты или группы в задание
 - `automation_targets_remove` — Убрать сайты или группы из задания
-- `audience_collect` — Собрать в интернете контакты, Telegram-каналы или группы (kinds: только группы / только каналы), сообщества/форумы (platforms: только группы Facebook, профили Instagram, форумы…) или площадки (аудитория)
-- `audience_start` — Запустить или продолжить сбор контактов (аудитория из context.audiences)
+- `audience_collect` — Создать сбор в интернете: контакты, сообщества, площадки, YouTube-каналы или исследовательские идеи и кейсы
+- `audience_start` — Запустить или продолжить сбор (аудитория из context.audiences); payload research: {"token_budget":N,"review_drafts":true} — продолжить исследование с учётом прежнего расхода или проверить сохранённые черновики
 - `audience_pause` — Поставить сбор контактов на паузу
 - `audience_finish` — Завершить сбор контактов сейчас (собранное остаётся)
 - `audience_archive` — Убрать аудиторию в архив (контакты остаются)
+- `audience_restart` — Начать поддерживаемый сбор полностью заново: новое поколение с нуля (прежний результат сохраняется; исследовательские коллекции заново запускаются созданием отдельной коллекции)
+- `audience_restore` — Сделать текущим сохранённое поколение аудитории (field — номер поколения)
+- `audience_description` — Описание сбора и критерии владельца: target — id аудитории, field — set (заменить) или append (дописать), value — текст до 20000 символов. Планировщик запросов и оценка соответствия читают описание; само описание не запускает сбор и не меняет цель или строки
+- `source_retry` — Прочитать источник знаний чата заново (после ошибки или чтобы обновить): target — id чата, field — id источника из context.chats[].sources
+- `site_check` — Проверить заново, на чём сделан сайт чата и как поставить на него чат: target — id чата, value — сайт из его разрешённых сайтов
+- `audience_configure` — Настроить сбор компаний без запуска и без нового поколения: target — id аудитории, payload с target_count/min_contacts, search_plan {cities,regions,languages,synonyms,directory_sources:[{name,url,max_pages}]}, fields, filter_directories и/или overseer {goal,max_target}. Цель ограничена оставшимся месячным лимитом тарифа; token_budget и Maps budget менять нельзя
+- `audience_row_upsert` — Добавить в существующую аудиторию (сбор компаний, сообществ или площадок) одну найденную вручную организацию или обновить её строку: target — id аудитории, payload — JSON строки (ключ — точный домен организации)
+- `audience_rows_select` — Добавить строки аудитории в избранное или снять отметку: target — id аудитории, payload {"row_ids":[точные ID строк до 200],"selected":true|false,"note":"необязательная заметка","status":"необязательный статус владельца"}
+- `audience_recheck` — Перепроверить существующие строки аудитории компаний на их собственных сайтах без нового поиска и генерации: target — id аудитории, payload — JSON {"scope":"legacy|unverified|all","limit":1..200}; сначала предложить через propose_changes, выполнять только после apply_changes
+- `overseer_create` — Создать ответственного — личность с ролью «ответственный», которая сама проверяет результат сбора и меняет способ поиска (запросы, слова, языки), досбор запускает сама, начать заново только предлагает владельцу: target — id аудитории (роль из её цели) или 0, value — имя (пусто — подберётся), field — пол, payload — дополнение к роли
+- `audience_overseer_set` — Назначить сбору ответственного: target — id аудитории, field — id личности-ответственного (пусто — созданный в этом же наборе), payload — лимиты JSON {"max_iterations","token_budget","deadline_days","no_progress_rounds","min_progress","max_target"} (всё необязательно)
+- `audience_overseer_state` — Ответственный сбора: value — pause (пауза), resume (продолжить) или unlink (отвязать, сбор идёт без него); target — id аудитории
+- `audience_overseer_undo` — Отменить изменение ответственного (вернуть настройки поиска): target — id аудитории, field — номер решения из журнала (audience_status.overseer.journal[].id)
+- `audience_overseer_apply` — Применить предложение ответственного начать сбор заново (новое поколение): target — id аудитории, field — номер решения (overseer.pending_proposal)
 - `feature_request` — Оставить заявку разработчикам на функционал, которого пока нет
 - `automation_activate` — Включить задание после проверки сценария
 - `automation_run` — Запустить задание сейчас
@@ -38,9 +97,19 @@ on apply.
 - `automation_archive` — Убрать задание в архив (не запускается и не считается в лимите тарифа; найденное и отчёты остаются)
 - `automation_unarchive` — Вернуть задание из архива (на паузе, включить — automation_activate)
 - `automation_secret_set` — Сохранить ключ API, который владелец прислал в чат, в «Ключи доступа» задания
+- `automation_step_place` — Где выполнять шаг задания: в браузере клиента или на сервере
+- `automation_step_patch` — Включить чтение полного текста карточки в одном шаге задания
+- `automation_split` — Разделить задание на несколько со своими расписаниями: источники сценария по группам сайтов, история найденного переходит в новые задания
+- `automation_share` — Поделиться заданием: публичная ссылка, по которой любой установит себе такую же копию (без ключей, получателей и истории)
+- `automation_share_revoke` — Отозвать ссылку «Поделиться» задания (одну или все)
+- `automation_install_shared` — Установить себе задание по ссылке «Поделиться» (копия встанет на проверку)
 - `account_secret_set` — Сохранить ключ API, который владелец прислал в чат, в «Ключи и доступы» аккаунта (для всех заданий)
-- `chat_channel_telegram_connect` — Подключить к онлайн-чату Telegram-бота владельца (токен из BotFather): чат отвечает и в Telegram
-- `chat_channel_disconnect` — Отключить канал онлайн-чата (Telegram-бота)
+- `ai_provider_route_set` — Настроить каскад ИИ аккаунта: field — назначение dialog|web_chat|collector|template_review, value — own|platform, payload — JSON маршрута; ключи заранее сохранить через account_secret_set
+- `step_run` — Выполнить разовый шаг на сайте, который действует (отправка, ставка, публикация): создаётся только инструментом MCP step_run, target — его номер; «Применить» запускает ровно предложенные значения
+- `template_publish` — Опубликовать одобренную версию пользовательского шаблона для всех клиентов: target — version_id, field — slug, value — public; только после явного выбора владельца и повторной проверки при «Применить»
+- `browser_mcp_allow` — Разрешить или запретить ИИ по MCP открывать страницы в браузере владельца (расширение AI Worker): target — device_id, value — on|off
+- `chat_channel_connect` — Подключить к онлайн-чату собственный аккаунт Telegram, Messenger, Instagram Direct, WhatsApp Business или VK; value — JSON с учётными данными, которые скрываются в ключевом хранилище
+- `chat_channel_disconnect` — Отключить канал онлайн-чата: field — telegram|messenger|instagram|whatsapp|vk
 - `agent_route_create` — Создать маршрут ИИ-агента: события аккаунта сразу в Claude Code или Codex владельца
 - `agent_route_update` — Изменить маршрут ИИ-агента
 - `agent_route_pause` — Поставить маршрут ИИ-агента на паузу

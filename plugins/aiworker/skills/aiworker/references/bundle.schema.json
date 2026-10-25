@@ -60,7 +60,7 @@
                                     },
                                     "instruction": {
                                         "type": "string",
-                                        "maxLength": 20000,
+                                        "maxLength": 50000,
                                         "description": "how the consultant talks and what it may say"
                                     },
                                     "default_lang": {
@@ -149,6 +149,85 @@
                                             ]
                                         },
                                         "description": "the persona's knowledge: shared by every chat of this persona"
+                                    },
+                                    "required_blocks": {
+                                        "type": "array",
+                                        "maxItems": 20,
+                                        "description": "parts of every reply the owner fixed: verbatim — inserted exactly (⟦block:name⟧), facts — written by the persona and checked by links, must_include and captions",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "name": {
+                                                    "type": "string",
+                                                    "pattern": "^[a-z0-9_-]{1,40}$"
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "maxLength": 120
+                                                },
+                                                "mode": {
+                                                    "enum": [
+                                                        "verbatim",
+                                                        "facts"
+                                                    ]
+                                                },
+                                                "applies": {
+                                                    "enum": [
+                                                        "always",
+                                                        "templates",
+                                                        "choice"
+                                                    ]
+                                                },
+                                                "templates": {
+                                                    "type": "array",
+                                                    "maxItems": 20,
+                                                    "items": {
+                                                        "type": "string",
+                                                        "maxLength": 80
+                                                    },
+                                                    "description": "template / category names or numbers of the role (applies: templates)"
+                                                },
+                                                "source_lang": {
+                                                    "type": "string",
+                                                    "maxLength": 10
+                                                },
+                                                "texts": {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "type": "string",
+                                                        "maxLength": 4000
+                                                    },
+                                                    "description": "language → the exact text; {incoming_link} — the first link of the incoming text"
+                                                },
+                                                "must_include": {
+                                                    "type": "array",
+                                                    "maxItems": 20,
+                                                    "items": {
+                                                        "type": "string",
+                                                        "maxLength": 200
+                                                    }
+                                                },
+                                                "captions": {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string",
+                                                            "maxLength": 200
+                                                        }
+                                                    },
+                                                    "description": "language → the owner's exact captions in it"
+                                                },
+                                                "incoming_links": {
+                                                    "type": "boolean",
+                                                    "description": "the reply must carry the links of the incoming text"
+                                                }
+                                            },
+                                            "required": [
+                                                "name",
+                                                "texts"
+                                            ]
+                                        }
                                     }
                                 },
                                 "required": [
@@ -532,7 +611,7 @@
                                     },
                                     "program": {
                                         "type": "object",
-                                        "description": "optional scenario: {start_url?, steps:[{op, …}]}; ops: use, goto, back, reload, check_auth, page_state, dismiss, click, click_text, type, set_value, clear, select, check, press, hover, mouse, scroll, wait, wait_until, get, extract, extract_list, feed, fetch, api, tgstat, telemetr, apify, json_list, storage_get, open_tab, close_tab, download, upload, screenshot, tg_join, tg_fetch, tg_search, tg_send, tg_discover, add_target, audience_fetch, youtube, for_each, if, repeat, break, try, call, jump, pause, stop, set, calc, regex, date, match, filter, dedupe, push, keep, decide, ai, save, notify, agent. Keys only as {{secret.NAME}}. Without a program the AI writes it.",
+                                        "description": "optional scenario: {start_url?, steps:[{op, …}]}; ops: use, collection_algorithm, goto, back, reload, check_auth, page_state, dismiss, click, click_text, type, set_value, clear, select, check, press, hover, mouse, scroll, wait, wait_until, get, extract, extract_list, feed, fetch, api, tgstat, telemetr, apify, json_list, storage_get, open_tab, close_tab, download, upload, screenshot, tg_join, tg_fetch, tg_search, tg_send, tg_discover, add_target, audience_fetch, youtube, for_each, if, repeat, break, try, call, jump, pause, stop, set, calc, regex, date, match, filter, dedupe, push, keep, decide, ai, save, notify, agent. Keys only as {{secret.NAME}}. Without a program the AI writes it.",
                                         "properties": {
                                             "start_url": {
                                                 "type": "string"
@@ -548,6 +627,7 @@
                                                         "op": {
                                                             "enum": [
                                                                 "use",
+                                                                "collection_algorithm",
                                                                 "goto",
                                                                 "back",
                                                                 "reload",
@@ -704,7 +784,9 @@
                                                     "telegram",
                                                     "communities",
                                                     "listings",
-                                                    "youtube"
+                                                    "youtube",
+                                                    "research",
+                                                    "algorithm"
                                                 ]
                                             },
                                             "check_messengers": {

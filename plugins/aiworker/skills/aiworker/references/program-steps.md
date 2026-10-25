@@ -10,7 +10,7 @@ Generated from the server's catalogue — the same list the AI Worker editor and
 
 ### `use` — Step template (kind: common)
 
-A ready group of steps the platform developers built and tested for a hard site (for example, posting to a Facebook group or approving requests to join it): it runs as one step, you only give the parameters — the group address, the text. A template works on its own sites: they must be among the task's sites. When a template is fixed, the fix reaches every task at once. Put a template that sends where an ordinary send goes: inside «For each» after «AI evaluates» or into the respond procedure.
+Готовая группа шагов, которую собрали и проверили разработчики платформы для трудного сайта (например, публикация поста или одобрение заявок в группе Facebook): выполняется как один шаг, вы указываете только параметры — адрес группы, текст. Шаблон работает на своих сайтах: они должны быть среди сайтов задания. Задание хранит выбранную версию шаблона: правки шаблона не меняют уже сохранённые задания. Чтобы применить новую версию, обновите шаг шаблона в задании. Шаблон с отправкой ставьте туда же, где обычную отправку: внутрь «Для каждого» после «ИИ оценивает» или в процедуру respond.
 
 | field | type | meaning |
 |---|---|---|
@@ -90,7 +90,7 @@ Clicks «Accept» / «Close» in cookie banners and dialogs, otherwise presses E
 
 ### `click` — Click an element (kind: web)
 
-Moves the mouse along a smooth path and clicks. «This is a submission» — the step runs only if the AI allowed the submission by your threshold or you approved the draft.
+Наводит мышь по плавной траектории и нажимает. «Это отправка» — шаг выполнится, только если отправку разрешил ИИ по вашему порогу или вы одобрили черновик. Для отправки можно задать confirm.gone (и необязательные confirm.appear/error): шаг ждёт подтверждения до 60 секунд, иначе элемент не считается отправленным.
 
 | field | type | meaning |
 |---|---|---|
@@ -104,7 +104,7 @@ Moves the mouse along a smooth path and clicks. «This is a submission» — the
 
 ### `click_text` — Click an element with text (kind: web)
 
-Finds, among the elements (selector), the one whose text contains the words you need and clicks it with the mouse. Handy for list rows, buttons and tabs without stable classes.
+Находит среди элементов (селектор) тот, в тексте которого есть нужные слова, и нажимает на него мышью. Удобно для строк списка, кнопок и вкладок без стабильных классов. Для отправки можно задать confirm.gone (и необязательные confirm.appear/error): шаг ждёт подтверждения до 60 секунд.
 
 | field | type | meaning |
 |---|---|---|
@@ -234,6 +234,20 @@ Scrolls the page or a single block (a chat list, a message feed): down, up, to t
 
 ## Reading data
 
+### `collection_algorithm` — Алгоритм сбора аудитории (kind: web)
+
+Открывает только заданные публичные страницы и возвращает наблюдения с источником и временем. Взаимодействие с сайтом запрещено.
+
+| field | type | meaning |
+|---|---|---|
+| `algorithm` | s | Algorithm — e.g. `google_maps_business` |
+| `params_json` | t | Параметры JSON — e.g. `{}` |
+| `into` | s | Переменная результата — e.g. `items` |
+
+```json
+{"op":"collection_algorithm","algorithm":"google_maps_business","params_json":"{\"niche\":\"кафе\",\"city\":\"София\",\"limit\":3}","into":"items"}
+```
+
 ### `wait` — Wait for an element (kind: web)
 
 Waits until the element appears on the page.
@@ -292,7 +306,7 @@ Reads several page fields at once into one object variable. If every field is em
 
 ### `extract_list` — Collect a list of cards (kind: web)
 
-Finds all cards (search results, chat messages, table rows) and takes fields from each one. The key is the field by which «new only» recognises the ones already seen. «Clean HTML» on a field removes tags and HTML entities; «Exclusions» drop cards whose fields contain the given text (case-insensitive). «Error if fewer cards» is for pages that always have cards (a feed, a catalogue, search results): if fewer are found, the site's layout has changed, and the AI repairs the scenario itself; the client is notified only if the repair fails. Empty — do not check (pages where an empty list is normal: new messages, results for a rare query). On a field: «canon» — the value becomes its canonical address (strips a search engine's redirect wrapper, reduces t.me/s/… and t.me/<name> to https://t.me/<name>) — put it on the link field before «Remove duplicates»; «number» — the field's text becomes a number (a metric: member count, visits) — for a one-off collection's sorting and filtering.
+Находит все карточки (результаты поиска, сообщения чата, строки таблицы) и из каждой берёт поля. Ключ — поле, по которому «только новые» узнаёт уже виденные. «Очистить HTML» у поля убирает теги и HTML-сущности; «Исключения» отбрасывают карточки, в полях которых встречается указанный текст (без учёта регистра). «Ошибка, если карточек меньше» — для страниц, где карточки есть всегда (лента, каталог, результаты поиска): если найдено меньше, вёрстка сайта изменилась, и ИИ сам чинит сценарий; клиенту приходит уведомление, только если починить не удалось. Пусто — не проверять (страницы, где пустой список — нормально: новые сообщения, результаты по редкому запросу). «Читать полную карточку» открывает страницу каждой новой карточки на том же сайте, последовательно и с паузой, и записывает описание в item.text; при ошибке item.enrich_error объясняет, почему описание отсутствует. Лимит шага ограничивает число страниц за запуск. «Селектор описания» заменяет body, если в нём нужно выбрать только область описания. У поля: «canon» — значение становится каноническим адресом (снимает обёртку поисковика, t.me/s/… и t.me/<имя> сводит к https://t.me/<имя>) — ставьте на поле-ссылку перед «Убрать дубликаты»; «number» — текст поля становится числом (метрика: численность, посещаемость) — для сортировки и отбора разового сбора.
 
 | field | type | meaning |
 |---|---|---|
@@ -303,6 +317,8 @@ Finds all cards (search results, chat messages, table rows) and takes fields fro
 | `min_items` | n | Error if fewer cards than — e.g. `do not check` |
 | `exclude` | t | Exclusions: one per line — a card with such text in a field does not get into the list — e.g. `archive
 closed` |
+| `enrich_full_card` | b | Читать полную карточку |
+| `card_selector` | sel | Селектор описания (пусто — вся страница) — e.g. `article, main` |
 | `into` | s | Save to variable — e.g. `items` |
 
 ```json
@@ -393,7 +409,7 @@ With a key: header Authorization = Bearer {{secret.API_TOKEN}}, the API_TOKEN ke
 | `query` | s | Search phrase — e.g. `{{params.query}}` |
 | `channel` | s | Внутренний ID для карточки или статистики — e.g. `{{item.internal_id}}` |
 | `country` | s | Страна (ID из справочника, пусто — весь мир) — e.g. `ukraine` |
-| `peer_type` | choice | Type — one of: `channel` (каналы), `group` (группы) |
+| `peer_type` | choice | Type — one of: `channel` (каналы), `group` (groups) |
 | `limit` | n | At most — e.g. `20` |
 | `into` | s | Save to variable — e.g. `telemetr` |
 
@@ -643,7 +659,7 @@ Google quota: channels / videos / playlistItems / commentThreads — 1 unit a re
 
 ### `for_each` — For each item of a list (kind: common)
 
-Runs the nested steps for each item of a list (a card, a message, a channel). «New only» skips the ones already processed in earlier runs.
+Выполняет вложенные шаги для каждого элемента списка (карточки, сообщения, канала). «Только новые» пропускает уже обработанные в прошлых запусках. «Читать полную карточку» открывает страницу каждого элемента с URL на том же сайте, последовательно и с паузой, и записывает описание в item.text; при ошибке item.enrich_error объясняет, почему описание отсутствует. Лимит цикла ограничивает число страниц за запуск.
 
 | field | type | meaning |
 |---|---|---|
@@ -651,6 +667,8 @@ Runs the nested steps for each item of a list (a card, a message, a channel). «
 | `as` | s | Item as — e.g. `item` |
 | `limit` | n | At most — e.g. `20` |
 | `only_new` | b | New only |
+| `enrich_full_card` | b | Читать полную карточку |
+| `card_selector` | sel | Селектор описания (пусто — вся страница) — e.g. `article, main` |
 
 Nested blocks: `steps` (For each item:).
 
@@ -660,7 +678,7 @@ Nested blocks: `steps` (For each item:).
 
 ### `if` — If (kind: common)
 
-Branching: by a variable (equals, greater than, contains…) or by the page (has an element, has a text, the address contains).
+Branching: by a variable (equals a value or another variable, greater than, contains…) or by the page (has an element, has text, the address contains).
 
 | field | type | meaning |
 |---|---|---|
@@ -760,12 +778,15 @@ Ends the current run: «normally» (next one by the schedule), «error» (notifi
 
 ### `set` — Remember a value (kind: common)
 
-Writes text with substitutions into a variable. This is how a search address is built from filters. {{x|url}} encodes the value for an address.
+Записывает в переменную текст с подстановками. Так собирается адрес поиска из фильтров. {{x|url}} — кодирует значение для адреса. Для длинного текста max_chars ограничивает длину; fallback берётся вместо исходного текста, а tail добавляется при обрезке на границе блока.
 
 | field | type | meaning |
 |---|---|---|
 | `var` | s | Variable — e.g. `url` |
 | `value` | s | Value — e.g. `https://site.example/search?rank={{rank\|url}}` |
+| `max_chars` | n | Не больше символов (необязательно) — e.g. `40000` |
+| `fallback` | s | Текст вместо длинного значения (необязательно) — e.g. `{{item.text}}` |
+| `tail` | s | Хвост при обрезке (необязательно) — e.g. `… Все вакансии: {{item.url}}` |
 
 ```json
 {"op":"set","var":"page","value":"1"}
