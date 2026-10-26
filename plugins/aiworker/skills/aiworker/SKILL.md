@@ -230,6 +230,15 @@ before proposing), `channel_accounts` (one employee's messenger accounts, number
 "Web chats and personas"), `desktop_link` (see below), `browser_targets`, `browser_open`, `browser_command`, `browser_status`, `browser_release`, `step_templates`, `step_run`, `step_run_status` (see below), `agent_routes`, `agent_events`, `agent_ack` (see "Events straight
 to your Claude or Codex").
 
+**Platform administrator: talk to a client's setup assistant.** When `admin_tenant_assistant` is present, it is only for an
+administrator connected to AI Worker's platform account. Send `tenant_id`, `message` and `reason` (optional `lang`);
+messages are dry-run by default and return the same answer and proposed cards the client would see. Keep the returned
+`conversation_id` to continue or read the history (`mode: "history"`, with no id to list your conversations, or with an id
+to read one). Apply a single card only in a separate call with `apply: true`, `conversation_id`, its `action_id`, and a
+required `reason`. Every message and apply is audited for the administrator and client; assistant usage is charged to the
+platform. This transcript is separate from the client's panel history and does not notify the client. The Filament page is
+«Мастер клиента».
+
 **The owner's AI providers (ADR 160).** In the panel, open Settings → AI models. It keeps the existing Claude API key,
 OpenAI API key, Claude Code and Codex CLI options, and adds DeepSeek, Qwen through DashScope International or China,
 OpenRouter, Gemini, Mistral, Groq, Together, Fireworks, xAI/Grok, Moonshot/Kimi and a custom OpenAI-compatible URL.
