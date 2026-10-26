@@ -77,7 +77,7 @@ Body: `{"text":"string","task_id":"integer"}`, required: text
 
 Предложить изменения: создать задание, чат, сбор контактов; изменить задание, FAQ, приветствие, инструкции; запустить, поставить на паузу… Ничего не меняется до /changes/apply
 
-Действия — тот же закрытый список, что у мастера (GET /guide). Поля действия: type, target (id объекта; 0 — новый), field, lang, value, question, answer, index, payload (JSON-строка для automation_* и audience_collect). Ответ: что будет изменено (pending) и что отклонено с причиной (refused).
+Действия — тот же закрытый список, что у мастера (GET /guide). Поля действия: type, target (id объекта; 0 — новый), field, lang, value, question, answer, index, payload (JSON-строка для automation_* и audience_collect). automation_create и automation_update принимают max_actions_per_day (0–10000, календарный день в часовом поясе аккаунта), min_interval_minutes (0–40320), event_max_age_minutes (0–40320; 0 отключает устаревание), event_overflow (keep_newest|keep_oldest, по умолчанию keep_oldest), max_queued_events (1–500), events_per_run (1–50), warmup_enabled, warmup_days (1–60), warmup_start_per_day, warmup_started_at (YYYY-MM-DD) и interval_jitter_percent (0–50). При прогреве max_actions_per_day — цель, стартовая квота по умолчанию max(1, round(target/8)), дата старта сохраняется при смене цели, день 0 начинается с неё; task_status возвращает pacing_status и полный план. Прогрев требует цели от 1 до 10000; jitter добавляет к паузе случайное время от 0 до указанного процента и не сокращает минимум. Лимиты применяются сервером перед каждым внешним действием. События старше срока помечаются skipped с reason=expired, а переполненные события — с reason=overflow; действия, остановленные дневным лимитом или минимальной паузой, и их события откладываются до ближайшего разрешённого времени и повторно оцениваются, если не истекут. Ответ: что будет изменено (pending) и что отклонено с причиной (refused).
 
 Body: `{"actions":"array"}`, required: actions
 
@@ -128,7 +128,7 @@ ADR 132. Работает на любом оплаченном тарифе ИИ
 
 С sites задание создаётся сразу (проверки мастера настройки), без sites описание читает ИИ мастера и сам выбирает сайты. Сценарий затем составляет ИИ-сотрудник (phase = authoring, обычно 2–5 минут) и, если activate не false, сразу включает задание. Если мастер не может сделать такое задание, заявка уходит разработчикам: ответ 202 с request = AW-N (при if_unclear = ask — 422 needs_details с вопросом мастера). Лимит заданий тарифа — 409 task_limit.
 
-Body: `{"description":"string","name":"string","sites":"array","criteria":"string","kind":"string","run_on":"string","no_browser":"string","every_minutes":"integer","daily_at":"string","mode":"string","worker_id":"integer","needs_auth":"boolean","accepts_input":"boolean","activate":"boolean","email_to":"string","telegram_to":"string","results_off":"boolean","if_unclear":"string"}`, required: description
+Body: `{"description":"string","name":"string","sites":"array","criteria":"string","kind":"string","run_on":"string","no_browser":"string","every_minutes":"integer","daily_at":"string","mode":"string","worker_id":"integer","needs_auth":"boolean","max_actions_per_day":"integer","min_interval_minutes":"integer","warmup_enabled":"boolean","warmup_days":"integer","warmup_start_per_day":"integer","warmup_started_at":"string","interval_jitter_percent":"integer","event_max_age_minutes":"integer","event_overflow":"string","max_queued_events":"integer","events_per_run":"integer","accepts_input":"boolean","activate":"boolean","email_to":"string","telegram_to":"string","results_off":"boolean","if_unclear":"string"}`, required: description
 
 ### `GET /connector/tasks/{id}`
 
@@ -370,6 +370,31 @@ Body: `{"text":"string","takeover":"boolean"}`, required: text
 
 Подпись каждого вебхука: заголовок X-Signature-Timestamp (unix-время, секунды) и X-AIWorker-Signature-V2 = "sha256=" + HMAC-SHA256(X-Signature-Timestamp + "." + тело запроса) секретом из панели. Сравнивайте подпись за постоянное время и отклоняйте запрос, если метка времени отличается от текущего времени больше чем на 5 минут: так перехваченный запрос нельзя повторить. Устаревший заголовок X-AIWorker-Signature (HMAC только тела, без метки времени) пока отправляется для совместимости и будет убран.
 
+## Приватные файлы браузера
+
+ADR 198: закрытое tenant storage, opaque file_id, allowlisted types, plan size limit, bounded TTL and browser-side readback. Never exposes a public or bearer download URL.
+
+### `GET /files`
+
+Список приватных файлов для браузера
+
+Только owner/admin. Возвращает opaque file_id, имя, MIME, размер, SHA-256, срок и allowed_hosts. Не возвращает путь или download URL.
+
+### `POST /files`
+
+Загрузить или импортировать приватный файл
+
+Только owner/admin. Поддерживает multipart file, JSON name+data_base64 или source_url+task_id из файла задания/сайта. Плановый лимит (по умолчанию 10 MiB), TTL 24 часа по умолчанию и максимум 168 часов. Разрешены PDF/DOC/DOCX/ODT/RTF/TXT/PNG/JPG; MIME проверяется по содержимому, запускаются проверки ADR-084 и ClamAV fail-open. Публичного URL нет.
+
+Body: `{"name":"string","data_base64":"string","source_url":"string","task_id":"integer","ttl_hours":"integer","allowed_hosts":"array"}`
+
+### `DELETE /files/{file_id}`
+
+Удалить приватный файл
+
+Только owner/admin. Если приватное хранилище недоступно, metadata остаётся для следующей уборки.
+- `file_id` (path, required)
+
 ## Плагин WordPress
 
 Мастер настройки и статистика онлайн-чатов в админке плагина AI Worker Chat. Вход — OAuth 2.1 + PKCE со scope=chat (регистрация POST /app/api/oauth/register, затем /app/oauth/authorize): токен открывает только онлайн-чаты, личности, FAQ, базу знаний, статистику и расход токенов ИИ; задания, ИИ-сотрудники, мессенджеры, оплата и ключи ему закрыты. Подходит и API-ключ.
@@ -482,9 +507,42 @@ Body: `{"reason":"string"}`, required: reason
 
 ## MCP server
 
-`POST https://kra.name/app/api/mcp` (Streamable HTTP, JSON answers), the same key. Tools: account_key_remove, account_key_set, account_keys, agent_ack, agent_events, agent_routes, ai_providers, alerts, algorithm_test, algorithm_test_status, apply_changes, attention_items, audience_rows, audience_status, audiences, brand_style_detect_from_site, brand_style_get, brand_style_set, browser_command, browser_open, browser_release, browser_status, browser_targets, capabilities, channel_accounts, chat_test, collection_algorithms, deck_archive, deck_create, deck_diff, deck_export_pdf, deck_export_pptx, deck_generate, deck_get, deck_list, deck_regenerate_slide, deck_restore, deck_revisions, deck_update, desktop_link, discard_changes, export, feature_requests, get_account, guide, image_generate, image_jobs, image_status, import, lookup, mailing_revisions_diff, mailing_revisions_list, mailing_revisions_restore, mailing_template_archive, mailing_template_create, mailing_template_diff, mailing_template_generate, mailing_template_get, mailing_template_restore, mailing_template_revisions, mailing_template_update, mailing_templates_list, outreach_rules, panel_settings, pending_changes, persona_ask, persona_blocks, persona_instruction, propose_changes, request_feature, revision_diff, revisions, server_add, server_audit_report, server_audit_run, server_audit_status, server_fix_apply, server_fix_propose, server_fix_rollback, server_test, shared_task, step_run, step_run_status, step_templates, storage_delete, storage_list, storage_read, storage_write, task_block_test, task_block_test_status, task_gallery, task_items, task_key_use, task_revision_diff, task_revisions, task_status, template_create, template_revoke, template_status, template_submit, template_test, template_update, template_validate; chat_test (MCP only) — start/say/stop/status to test an account chat through the widget answer path; preview sessions are excluded from visitor statistics, leads and chat billing, replies count against the account AI limit, sessions expire after 60 idle minutes, and the per-account rate cap matches persona_ask; persona_ask (REST `POST /personas/{id}/ask`) — a reply written by one of
+`POST https://kra.name/app/api/mcp` (Streamable HTTP, JSON answers), the same key. Tools: account_key_remove, account_key_set, account_keys, agent_ack, agent_events, agent_routes, ai_architecture_report, ai_providers, ai_security_report, alerts, algorithm_test, algorithm_test_status, apply_changes, attention_items, audience_rows, audience_status, audiences, brand_style_detect_from_site, brand_style_get, brand_style_set, browser_command, browser_open, browser_release, browser_status, browser_targets, capabilities, channel_accounts, chat_test, collection_algorithms, company_knowledge_search, company_profile, deck_archive, deck_create, deck_diff, deck_export_pdf, deck_export_pptx, deck_generate, deck_get, deck_list, deck_regenerate_slide, deck_restore, deck_revisions, deck_update, design_reference_add, design_references_list, desktop_link, discard_changes, export, feature_requests, file_delete, file_upload, files_list, get_account, guide, image_generate, image_jobs, image_status, import, lookup, mailing_revisions_diff, mailing_revisions_list, mailing_revisions_restore, mailing_template_archive, mailing_template_create, mailing_template_diff, mailing_template_generate, mailing_template_get, mailing_template_restore, mailing_template_revisions, mailing_template_update, mailing_templates_list, object_search, outreach_rules, panel_settings, pending_changes, persona_ask, persona_assign, persona_assignment_events, persona_assignments, persona_blocks, persona_instruction, persona_site_connect, propose_changes, request_feature, revision_diff, revisions, server_access_revoke, server_add, server_audit_report, server_audit_run, server_audit_status, server_fix_apply, server_fix_propose, server_fix_rollback, server_test, shared_task, specialist_checklist, specialist_review, step_run, step_run_status, step_templates, storage_delete, storage_list, storage_read, storage_write, task_block_test, task_block_test_status, task_gallery, task_items, task_key_use, task_revision_diff, task_revisions, task_runs, task_status, template_create, template_revoke, template_run_link_create, template_status, template_submit, template_test, template_update, template_validate, ui_design_preview; chat_test (MCP only) — start/say/stop/status to test an account chat through the widget answer path; preview sessions are excluded from visitor statistics, leads and chat billing, replies count against the account AI limit, sessions expire after 60 idle minutes, and the per-account rate cap matches persona_ask; persona_ask (REST `POST /personas/{id}/ask`) — a reply written by one of
 the owner's personas, sent to nobody; desktop_link (MCP only) — a one-time link, 10 minutes, to an AI employee's desktop; browser_targets, browser_open, browser_command, browser_status, browser_release (MCP only) — an explicit browser with a per-session domain scope and read-only or interactive policy: the AI employee's dedicated server browser (browser=server) or the owner's own browser through the AI Worker extension (browser=client, device_id; only where he allowed it; never drive his browser with OS-level computer use); LinkedIn Jobs/Posts remain under linkedin_read_only; post_link {ref} is the only bounded recovery action and returns a sanitized permalink from the exact post menu; no Firefox. At most 10 messages per request, 120 tool calls, 10 imports and 30 persona_ask calls a minute.
 Step templates and owner-authored templates (ADR 156): step_templates, step_run, step_run_status; template_create, template_update, template_validate, template_test, template_submit (scope tenant|public), template_status, template_revoke. Both submit scopes require AI review. tenant is company-only by default. A public-scope AI approval is not publication: after the owner's explicit choice use propose_changes with template_publish {target:version_id, field:slug, value:public}, then apply_changes; at apply time perform an independent deterministic recheck by rerunning validators and the blocklist on the stored version and audit the result. template_status also reads platform version_id, content_hash, status, where and inputs. Tasks pin exact version_id and content_hash. gmail_read_messages is read-only, client_browser-only, checks the Gmail UI account against the expected email, requires exactly one of Gmail query or thread URL, masks OTP/reset links/secrets, treats message text as untrusted, and never follows message links or downloads attachments.
-Password actions (extension 0.7.0+, client browser only): vault_status returns only not_initialized|locked|unlocked, protection=master_phrase|none, auto_generate and write_only_available; the default key is session-scoped and locks after 15 idle minutes, while owner-selected none stores the key in extension local storage and stays open; passwords and key never leave the browser; password_entries lists refs/labels/accounts and password_fill reads existing entries only after the owner unlocks locally. password_generate_fill can append a newly generated password while locked using the extension-local public key; it is merged into the encrypted vault on unlock, never overwrites, and possible duplicates are flagged. A separate trusted local confirmation for the exact site is shown only when the owner enables that setting; it is not an unlock prompt. Switching back from none requires setting or confirming a phrase and locks the unchanged encrypted envelope. Secrets never enter MCP results or logs.
+
+## One-time approved-template runs (ADR 208/216)
+
+Use direct MCP `step_run` with an explicit `where`, exact target and stable `idempotency_key`; an acting step returns a
+proposal and runs only after the owner's `apply_changes`. For a webhook caller, use `template_run_link_create` after the
+owner confirms the approved version and mode. Supply `template_id` or `template`, `template_version_id` or `template_hash`,
+`execution_target` (`client_browser` with `device_id`, or `server` with `worker_id` and `node_id`); `where` is a compatible
+alias. The tool requires `confirmed:true`; `allow_submit:true` is needed for submit mode. An optional `callback_url` must
+be public HTTPS, and the HMAC secret is returned once.
+
+POST `/app/api/hooks/runs/{token}` with the declared typed inputs and a stable key:
+
+```json
+{
+  "idempotency_key": "order-1042",
+  "inputs": {
+    "project_url": "https://freelancehunt.com/project/example/12345.html",
+    "text": "Owner-approved bid",
+    "price": "500",
+    "days": "5",
+    "mode": "fill_only"
+  }
+}
+```
+
+The same key and inputs return the same `run_id`; a key conflict is 409, invalid inputs are 422 without spending the link,
+and an unkeyed later POST is 410. Offline targets wait at the pinned device/server until expiry. Poll
+`/app/api/hooks/runs/{token}/status` for status, safe result, error/step and journal. The panel keeps MCP and webhook runs in
+«Разовые задания»; these runs do not use the active-task quantity limit, while token and parallel-run limits remain.
+
+An optional final callback uses `X-Signature-Timestamp` and `X-AIWorker-Signature-V2`, with HMAC-SHA256 of
+`{timestamp}.{raw_body}`. Retries occur after 1, 5, 15, 60 and 360 minutes and never replay the template action. An
+`uncertain` external action is not retried automatically.Password actions (extension 0.7.0+, client browser only): vault_status returns only not_initialized|locked|unlocked, protection=master_phrase|none, auto_generate and write_only_available; the default key is session-scoped and locks after 15 idle minutes, while owner-selected none stores the key in extension local storage and stays open; passwords and key never leave the browser; password_entries lists refs/labels/accounts and password_fill reads existing entries only after the owner unlocks locally. password_generate_fill can append a newly generated password while locked using the extension-local public key; it is merged into the encrypted vault on unlock, never overwrites, and possible duplicates are flagged. A separate trusted local confirmation for the exact site is shown only when the owner enables that setting; it is not an unlock prompt. Switching back from none requires setting or confirming a phrase and locks the unchanged encrypted envelope. Secrets never enter MCP results or logs.
 Extension-owned MCP windows (0.7.0+): browser_open purpose=housekeeping on an explicit client device opens a short page-free session; browser_command own_windows lists only the extension's tracked MCP tabs, and close_own_window closes eligible tracked tabs after release, with local confirmation for human-edited, unsaved or uninspectable tabs. Handed-over and unrelated tabs are never closed. A repeated release after keep_open says already_released and how to close the old window.
 Task block checks: task_block_test starts one read-only top-level block on the task's configured server or client browser; give task_id, a zero-based integer step or editor path such as "2", optional task-site listing URL and limit 1–10. Poll task_block_test_status for intermediate values, opened card URLs, cut card text, per-card errors and would-do actions. Full-card reading is enabled on one extract_list or for_each step with automation_step_patch through propose_changes and apply_changes; card reads are sequential, same-site, politely delayed and capped at 20 per run; failure removes item.text and sets item.enrich_error.
+Employee storage (ADR 211): `get_account.employee_storage` reports tenant-only used_bytes, quota_bytes, remaining_bytes, category breakdown, large-file links, node freshness and BYOS status. Included quotas are Mini 2 GB, Constructor 2 GB, Start 5 GB, Business 10 GB and Max 25 GB; connected BYOS shows the real free disk and `quota_bytes: null`. A panel owner can buy multiple +10 GB monthly units for $3 per unit on Subscription and billing; reductions start at period end. File downloads are private owner-panel streams; never expose a node path or whole-node disk values.

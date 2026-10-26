@@ -6,6 +6,58 @@ Generated from the server's catalogue — the same list the AI Worker editor and
 `{{secret.NAME}}` (and only in `api` steps). Steps marked «kind: web» are for site tasks, «telegram» for Telegram tasks,
 «common» for both. A step that sends something (`submit: true`, `tg_send`) runs only after a `decide` allowed it.
 
+## Semantic field bindings
+
+`selector` can be a CSS/XPath string or a semantic descriptor. The shared runtime resolves visible elements by an
+accessible name, explicit label, placeholder, `aria-label`, button text, or role. Text is matched after normalizing
+whitespace and case; an exact match wins over a partial match. If multiple best matches remain, the step fails and lists
+the candidate elements; it never picks one arbitrarily. A missing match is also a step error for required actions.
+
+```json
+{"op":"set_value","selector":{"by":"label","any":["Текст ставки","Коментар до ставки","Proposal text"]},"value":"{{item.text}}"}
+```
+
+Allowed `by` values: `label`, `placeholder`, `aria-label`, `button`, `role`, `name`. `role` also supplies a role, such as
+`{"by":"role","role":"combobox","any":["Portfolio work"]}`. The selector resolver is shared by the extension's
+client browser and the server's Playwright driver.
+
+## Freelancehunt bid template (`fh_bid`, ADR-207)
+
+`fh_bid` is a platform web template for `freelancehunt.com`, restricted to `client_browser`. It takes `project_url`
+(must contain `/project/` on the exact Freelancehunt host), approved `text`, positive `price`, `days` (1–365), optional
+`currency`, optional portfolio `sample_title`, and `mode` (`fill_only` by default, or `submit`). It opens the project,
+checks login/closed/already-bid states, opens and fills the form, reads back the supplied values, and saves a screenshot.
+It chooses one exact portfolio option title from a custom combobox as well as from a native select. Missing or duplicate
+titles fail the step. `fill_only` leaves the form unsent. `submit` clicks with `submit:true`, checks the existing task
+decision and server permit, verifies a success notice or closed form, and saves a second screenshot. A Cloudflare
+challenge stops for the owner to handle in their own browser; the template does not bypass it.
+
+For webhook items or a task-built `items` list, pass the values per item. Keep `decide` and the `d.action == send`
+condition before the template so a task in automatic mode sends only the items its regular decision approved. There is
+no extra confirmation for each item, and every submission still passes ADR-094's `permit(action_id)` and ADR-200's
+server pacing limits.
+
+```json
+{
+  "start_url":"https://freelancehunt.com/",
+  "steps":[{"op":"for_each","list":"events","as":"item","limit":10,"steps":[
+    {"op":"decide","input":["item"],"into":"d"},
+    {"op":"if","cond":{"var":"d.action","eq":"send"},"then":[{
+      "op":"use","template":"fh_bid","where":"client_browser","params":{
+        "project_url":"{{item.project_url}}","text":"{{item.text}}","price":"{{item.price}}",
+        "days":"{{item.days}}","sample_title":"{{item.sample_title}}","mode":"submit"
+      }
+    }]}
+  ]}]
+}
+```
+
+Example task pacing: `max_actions_per_day=10`, `min_interval_minutes=60`, `events_per_run=10` and optionally
+`event_max_age_minutes=1440`. Keep `fill_only` while validating labels in the owner's logged-in browser. After the owner
+confirms the live checklist, the original draft templates #30/#31 can be archived with
+`cd laravel && php artisan automation:archive-freelancehunt-drafts --live-validated`; this command preserves both rows
+and their versions and has not been run by the DEV implementation.
+
 ## Step templates
 
 ### `use` — Step template (kind: common)
@@ -94,7 +146,7 @@ Clicks «Accept» / «Close» in cookie banners and dialogs, otherwise presses E
 
 | field | type | meaning |
 |---|---|---|
-| `selector` | sel | Selector (CSS or XPath) — e.g. `.card a or //div[@class="price"]` |
+| `selector` | sel | Селектор CSS/XPath или semantic-привязка к подписи, placeholder, aria-label, кнопке или роли — e.g. `.card a или {"by":"label","any":["Цена","Price"]}` |
 | `submit` | b | This is a submission (only with permission) |
 | `optional` | b | Optional step |
 
@@ -123,7 +175,7 @@ Types like a person: at its own speed, line breaks with Shift+Enter (suits messe
 
 | field | type | meaning |
 |---|---|---|
-| `selector` | sel | Selector (CSS or XPath) — e.g. `.card a or //div[@class="price"]` |
+| `selector` | sel | Селектор CSS/XPath или semantic-привязка к подписи, placeholder, aria-label, кнопке или роли — e.g. `.card a или {"by":"label","any":["Цена","Price"]}` |
 | `text` | t | Text — e.g. `can be {{d.reply}}, {{item.title}}` |
 
 ```json
@@ -136,7 +188,7 @@ Sets the value at once, without typing letter by letter, and tells the page abou
 
 | field | type | meaning |
 |---|---|---|
-| `selector` | sel | Selector (CSS or XPath) — e.g. `.card a or //div[@class="price"]` |
+| `selector` | sel | Селектор CSS/XPath или semantic-привязка к подписи, placeholder, aria-label, кнопке или роли — e.g. `.card a или {"by":"label","any":["Цена","Price"]}` |
 | `value` | s | Value — e.g. `{{dwt_from}}` |
 
 ```json
@@ -149,7 +201,7 @@ Selects everything (Ctrl+A) and deletes it — works both in ordinary fields and
 
 | field | type | meaning |
 |---|---|---|
-| `selector` | sel | Selector (CSS or XPath) — e.g. `.card a or //div[@class="price"]` |
+| `selector` | sel | Селектор CSS/XPath или semantic-привязка к подписи, placeholder, aria-label, кнопке или роли — e.g. `.card a или {"by":"label","any":["Цена","Price"]}` |
 
 ```json
 {"op":"clear","selector":"div[contenteditable=true]"}
@@ -161,7 +213,7 @@ Chooses a drop-down item by its value or by its text (an exact match first, then
 
 | field | type | meaning |
 |---|---|---|
-| `selector` | sel | Selector (CSS or XPath) — e.g. `.card a or //div[@class="price"]` |
+| `selector` | sel | Селектор CSS/XPath или semantic-привязка к подписи, placeholder, aria-label, кнопке или роли — e.g. `.card a или {"by":"label","any":["Цена","Price"]}` |
 | `value` | s | Value or item text — e.g. `Master` |
 
 ```json
@@ -174,7 +226,7 @@ Ticks or unticks a checkbox. If it is already in the right position, does nothin
 
 | field | type | meaning |
 |---|---|---|
-| `selector` | sel | Selector (CSS or XPath) — e.g. `.card a or //div[@class="price"]` |
+| `selector` | sel | Селектор CSS/XPath или semantic-привязка к подписи, placeholder, aria-label, кнопке или роли — e.g. `.card a или {"by":"label","any":["Цена","Price"]}` |
 | `checked` | b | Ticked |
 
 ```json
@@ -199,7 +251,7 @@ Moves the cursor over an element — opens menus and tooltips that appear on hov
 
 | field | type | meaning |
 |---|---|---|
-| `selector` | sel | Selector (CSS or XPath) — e.g. `.card a or //div[@class="price"]` |
+| `selector` | sel | Селектор CSS/XPath или semantic-привязка к подписи, placeholder, aria-label, кнопке или роли — e.g. `.card a или {"by":"label","any":["Цена","Price"]}` |
 | `optional` | b | Optional step |
 
 ```json
@@ -254,7 +306,7 @@ Waits until the element appears on the page.
 
 | field | type | meaning |
 |---|---|---|
-| `selector` | sel | Selector (CSS or XPath) — e.g. `.card a or //div[@class="price"]` |
+| `selector` | sel | Селектор CSS/XPath или semantic-привязка к подписи, placeholder, aria-label, кнопке или роли — e.g. `.card a или {"by":"label","any":["Цена","Price"]}` |
 | `timeout` | n | Wait, seconds — e.g. `15` |
 | `optional` | b | Optional step |
 
@@ -281,7 +333,7 @@ Reads one element: its text, link, image, field value, HTML or any attribute. Th
 
 | field | type | meaning |
 |---|---|---|
-| `selector` | sel | Selector (CSS or XPath) — e.g. `.card a or //div[@class="price"]` |
+| `selector` | sel | Селектор CSS/XPath или semantic-привязка к подписи, placeholder, aria-label, кнопке или роли — e.g. `.card a или {"by":"label","any":["Цена","Price"]}` |
 | `attr` | attr | What to take |
 | `into` | s | Save to variable — e.g. `value` |
 | `optional` | b | Optional step |
@@ -505,17 +557,18 @@ Downloads a file (by clicking a button or by address) of up to 15 MB and stores 
 {"op":"download","selector":"a.cv-pdf","into":"cv"}
 ```
 
-### `upload` — Upload a file (kind: web)
+### `upload` — Выбрать файл в поле загрузки (kind: web)
 
-Attaches a file to an upload field or through a button that opens the file picker. The source is a link to a task file or a file on the task's site.
+Выбирает защищённый файл по file_id в точном input[type=file] и сверяет имя, размер, MIME и SHA-256 там, где браузер его читает. Форма не отправляется этим шагом; отправка — отдельное действие после подтверждения владельца. Старый URL файла задания/сайта сначала проходит импорт, MIME/ADR-084/антивирусные проверки и приватное хранение.
 
 | field | type | meaning |
 |---|---|---|
-| `selector` | sel | File field or the «Attach» button — e.g. `input[type=file]` |
-| `url` | s | File address — e.g. `{{file}}` |
+| `selector` | sel | Точное поле input[type=file] — e.g. `input[type=file]` |
+| `file_id` | s | Защищённый file_id владельца — e.g. `{{resume_file_id}}` |
+| `url` | s | Адрес файла задания или сайта (legacy) — e.g. `{{file}}` |
 
 ```json
-{"op":"upload","selector":"input[type=file]","url":"{{cv}}"}
+{"op":"upload","selector":"input[type=file]","file_id":"{{resume_file_id}}"}
 ```
 
 ### `screenshot` — Screenshot (kind: web)

@@ -9,15 +9,25 @@ on apply.
 - `plan_recommend` — Рекомендовать один активный тариф ИИ-сотрудника: plan — код тарифа из context.worker_interview.plans, reason — короткая причина по ответам владельца; тариф не оплачивается автоматически
 - `persona_field` — Изменить имя, фамилию, пол или должность личности
 - `persona_create` — Создать личность (консультанта)
+- `persona_assignment_create` — Поставить профессиональную задачу личности: target — id своей доступной личности; payload — JSON {"title":"…","brief":"…","token_budget"?:1000–500000}; создание после «Применить», с повторной серверной проверкой роли, доступа и бюджета
 - `revision_restore` — Восстановить ревизию задания, коллекции или личности
 - `persona_block_set` — Добавить или изменить обязательный блок ответов личности (persona_ask): field — имя блока, payload — JSON блока
 - `persona_block_remove` — Убрать обязательный блок ответов личности: field — имя блока
-- `server_add` — Предложить подключение сервера для аудита: payload JSON {"host","port","user","name"}; private key создаётся и хранится зашифрованным
+- `server_add` — Предложить подключение сервера для аудита: payload JSON {"host","port","user","name","create_audit_user":true|false}; private key создаётся и хранится зашифрованным
 - `server_test` — Предложить проверку SSH-подключения: target — id своего сервера из server list
 - `server_audit_run` — Предложить запуск только чтения по активному перечню: target — id своего сервера
+- `server_access_revoke` — Предложить владельцу отзыв доступа к своему серверу и удаление сохранённого private key; payload JSON {"remove_created_user":true|false}; после подтверждения вернуть одноразовую команду sudo для владельца
 - `server_fix_propose` — Подготовить точный план исправления выбранных находок: target — id прогона, payload JSON {"finding_ids":[...],"safe_only":true|false}
 - `server_fix_apply` — Предложить применение ранее показанного плана: target — id предложения. MCP не может подтверждать высокорисковые пункты; владелец отдельно отмечает каждый такой пункт на странице аудита сервера.
 - `server_fix_rollback` — Предложить откатить подтверждённые исправления из резервных копий: target — id предложения
+- `standing_assignment_create` — Предложить постоянное задание: target — persona_id; payload JSON {title,brief,task_type?,server_id?,mode:continuous|scheduled,min_interval_minutes?,frequency_unit:hours|days|weekly?,frequency_interval?,weekday:1..7?,local_time?,tokens_per_iteration,daily_token_budget,monthly_token_budget,daily_external_actions_limit?,auto_approve_actions?}. Для server_security_audit требуется server_id и личность server_security_auditor.
+- `standing_assignment_update` — Предложить изменение постоянного задания: target — standing_assignment_id; payload — поля расписания/бюджетов или {state:pause|resume|stop}. Создание и изменение применяются только после apply_changes.
+- `ai_architecture_report` — Подготовить только отчёт об архитектуре ИИ: payload JSON с description, source_text, source_url, source_worker_id?, probe_permission? и code_source? (GitHub repo/ref/token_secret, публичный GitHub URL или repository_archive file_id); токен передаётся только по имени заранее сохранённого секрета REPO_AUDIT_ либо подключённого сайта GitHub и никогда не кладётся в payload
+- `ai_security_report` — Подготовить только отчёт о безопасности ИИ: payload JSON с description, source_text, source_url, source_worker_id?, probe_permission? и code_source? (GitHub repo/ref/token_secret, публичный GitHub URL или repository_archive file_id); для исходного server-side кода можно указать auditor_role=server_security_auditor; токен передаётся только по имени заранее сохранённого секрета REPO_AUDIT_ либо подключённого сайта GitHub и никогда не кладётся в payload; исправления только после отдельного запроса владельца
+- `specialist_review` — Проанализировать существующий материал выбранной платформенной личности: target — id специалиста; payload JSON с source_url и/или source_text и/или source_ref (knowledge_source:<id>, worker_knowledge_source:<id>, mailing_template:<id>, presentation:<id>, persona_instruction:<id>, chat_greeting:<id>), focus?, lang?=ru|en|uk, format?=html|sheet|doc. Источники и объекты принадлежат этому аккаунту; отчёт только для чтения.
+- `specialist_checklist` — Создать чек-лист по просьбе владельца выбранным платформенным специалистом: target и platform_role_persona_id — id одной включённой личности; payload JSON {topic,goal,context?,source_url?,source_text?,source_ref?,lang?}. source_ref может указывать только на объект аккаунта, source_url читается с SSRF-защитой; результат — новая версия чек-листа.
+- `ui_design_preview` — Подготовить локальный HTML-концепт веб-интерфейса: target — id ИИ-сотрудника, payload JSON {"brief": описание экрана, "brand_choice": "use" (фирменный стиль) | "neutral" (нейтральная палитра) | "adjust"} или {"brief", "brand_site_url"}; без внешних ресурсов
+- `design_reference_add` — Добавить референс дизайна компании после подтверждения владельца: payload JSON {"role":"all_designers|ui_web_designer|ux_designer|graphic_designer|brand_identity_designer|mailing_designer|deck_designer","title"?,"note"?,"url"? или "staged_id" + "name"}; загрузка остаётся временной до apply_changes
 - `worker_instruction_append` — Дополнить инструкцию ИИ-сотрудника
 - `worker_instruction_replace` — Заменить инструкцию ИИ-сотрудника
 - `attention_hide` — Скрыть строки с требующими внимания диалогами или вопросами: target — id ИИ-сотрудника, payload — JSON {"all":true} либо {"items":["c:<conversation_id>","q:<question_id>"]} из attention_items
@@ -31,7 +41,7 @@ on apply.
 - `notification_preferences` — Изменить настройки уведомлений: field user с payload {"prefs":{"tg_draft":true,…}} (неуказанные переключатели сохраняют прежнее значение) или field webhook с payload {"url":"https://…","events":[…]}; URL вебхука никогда не возвращается
 - `notification_test` — Отправить тестовое событие на уже настроенный webhook аккаунта; target не нужен, URL и ответное тело не возвращаются
 - `brand_style_set` — Сохранить стиль бренда компании: payload — JSON с description, colors, fonts, logo_url, tone, signature, legal_footers, button_style и do_dont
-- `brand_style_detect_from_site` — Определить стиль бренда по публичному сайту как черновое предложение: target — id ИИ-сотрудника, payload — JSON {"url":"https://…"}; применить предложенный стиль отдельным brand_style_set
+- `brand_style_detect_from_site` — Определить стиль бренда по публичному сайту после подтверждения владельца, сохранить новой ревизией и показать найденные значения; target — id ИИ-сотрудника, payload — JSON {"url":"https://…","designer_role":"mailing_designer|deck_designer|ui_web_designer"}; генерация не запускается
 - `mailing_template_create` — Создать черновик шаблона рассылки: target — id ИИ-сотрудника, payload — JSON {"name","brief","source_text","variants"}
 - `mailing_template_generate` — Сгенерировать или переделать варианты шаблона: target — id ИИ-сотрудника, payload — JSON {"name","brief","source_text","instruction","template_id"?}
 - `mailing_image_generate` — Создать платное изображение для шаблона рассылки: target — id шаблона, payload — JSON {"brief","aspect"?,"placement"?}; перед применением покажи стоимость
@@ -51,11 +61,20 @@ on apply.
 - `locale` — Изменить язык панели владельца: value — ru|en|uk
 - `size` — Изменить размер интерфейса панели владельца: value — compact|default|large
 - `channel_account_connect` — Подключить собственный номер сотрудника: target — id сотрудника, field — whatsapp|telegram|imo|max, value — номер телефона; после применения вернуть ссылку на панель для входа по QR или коду
+- `email_sender_connect` — Подключить SMTP-сервис отправки почты: сначала покажи варианты из context.email_sending_providers с описанием и ссылкой регистрации/ключа; target 0; payload JSON {provider,host?,port?,region?,from_email,from_name,domain?,daily_limit?,reply_channel_account_id?}; value — JSON {username,password} со ссылками вида [ключ#N ••••1234], а не секретами; для провайдеров с фиксированным логином username можно опустить. Секреты будут зашифрованы и скрыты в предложении.
+- `email_sender_test` — Проверить SMTP-сервис почты без отправки письма: target — id своего сервиса; EHLO и AUTH выполняются после подтверждения действия.
+- `email_sender_archive` — Отключить SMTP-сервис почты без удаления настроек и истории: target — id сервиса своего аккаунта.
 - `platform_number_order` — Заказать номер AI Worker за $5/мес. за номер: target — id сотрудника, payload — JSON {"channels":["telegram","whatsapp"]}; один номер можно использовать в нескольких выбранных каналах; перед применением показать outreach_warning и получить number_order_acknowledgement
 - `platform_number_cancel` — Отменить платный номер AI Worker и будущие начисления: target — id platform_number_addon из channel_accounts; постоянные бесплатные номера отменить нельзя
+- `specialists_addon_enable` — Запросить подключение «Специалистов Max»; после предложения требуется apply_changes владельца, затем отдельная оплата по ссылке
+- `specialists_addon_cancel` — Запланировать отключение «Специалистов Max» в конце оплаченного периода через propose_changes → apply_changes
+- `specialists_addon_keep` — Отменить запланированное отключение «Специалистов Max» через propose_changes → apply_changes
 - `faq_add` — Добавить вопрос в FAQ
 - `faq_update` — Изменить вопрос FAQ
 - `faq_delete` — Удалить вопрос FAQ
+- `company_profile_set` — Предложить изменение карточки компании: payload — JSON с полями name, websites, description, products, conditions, contacts, tone, languages; пропущенные поля сохраняются как есть
+- `company_source_add` — Предложить источник общей базы знаний аккаунта: field — site|url|text|faq, value — URL или текст; payload — JSON {"name"?,"smart_prompt"?,"include_paths"?,"exclude_paths"?}. Для сайта сервер показывает предпросмотр и предел тарифа до применения
+- `chat_languages` — Языки чата: payload — JSON {"languages":["ru","uk"],"default":"ru"}; от 1 до 10 кодов WebChat, основной язык должен входить в список
 - `chat_greeting` — Приветствие чата
 - `chat_suggestions` — Быстрые вопросы чата
 - `chat_name` — Название чата
@@ -65,7 +84,7 @@ on apply.
 - `chat_enabled` — Включить или выключить чат
 - `chat_site_add` — Разрешить чату работать на сайте: добавить домен в «Разрешённые сайты» (value — домен или адрес сайта, *.example.com — со всеми поддоменами)
 - `chat_site_remove` — Убрать сайт из «Разрешённых сайтов» чата (value — домен)
-- `source_add` — Добавить в базу знаний сайт, страницу, Google Таблицу или Google Документ (field: site|url|gsheet|gdoc)
+- `source_add` — Добавить в базу знаний сайт, страницу, Google Таблицу или Google Документ (field: site|url|gsheet|gdoc); для сайта payload может содержать smart_prompt, include_paths, exclude_paths; сервер показывает предпросмотр страниц до применения
 - `chat_create` — Создать онлайн-чат
 - `automation_create` — Создать задание на сайте или в Telegram
 - `automation_update` — Изменить задание
@@ -75,16 +94,23 @@ on apply.
 - `audience_start` — Запустить или продолжить сбор (аудитория из context.audiences); payload research: {"token_budget":N,"review_drafts":true} — продолжить исследование с учётом прежнего расхода или проверить сохранённые черновики
 - `audience_pause` — Поставить сбор контактов на паузу
 - `audience_finish` — Завершить сбор контактов сейчас (собранное остаётся)
-- `audience_archive` — Убрать аудиторию в архив (контакты остаются)
+- `audience_archive` — Убрать аудиторию в архив без удаления (контакты остаются)
+- `audience_unarchive` — Вернуть аудиторию из архива на паузу без автоматического запуска сбора: target — id аудитории
 - `audience_restart` — Начать поддерживаемый сбор полностью заново: новое поколение с нуля (прежний результат сохраняется; исследовательские коллекции заново запускаются созданием отдельной коллекции)
 - `audience_restore` — Сделать текущим сохранённое поколение аудитории (field — номер поколения)
 - `audience_description` — Описание сбора и критерии владельца: target — id аудитории, field — set (заменить) или append (дописать), value — текст до 20000 символов. Планировщик запросов и оценка соответствия читают описание; само описание не запускает сбор и не меняет цель или строки
+- `helper_attach` — Прикрепить платформенного помощника к своему сбору или заданию: field — audience|automation_task, target — id объекта, payload — JSON {"step":"search_plan|quality_review|texts","platform_role":"ключ роли","token_budget_month":50000,"token_budget_run":8000,"auto_apply":false}; роли берутся из helper_catalog в get_account. Доступны на Max или с дополнением «Специалисты Max»
+- `helper_update` — Изменить помощника: target — id из audience_status.helpers/task_status.helpers, payload — JSON со status active|paused, token_budget_month, token_budget_run и auto_apply (только search_plan)
+- `helper_detach` — Снять помощника с объекта, сохранив журнал: target — id из audience_status.helpers/task_status.helpers
+- `helper_run` — Запустить помощника вручную без отправки и публикации: target — id помощника; для texts необязательный payload {"instruction":"…","data":{…}}; результаты остаются черновиком или предложением владельцу
 - `source_retry` — Прочитать источник знаний чата заново (после ошибки или чтобы обновить): target — id чата, field — id источника из context.chats[].sources
+- `source_delete` — Убрать источник знаний из базы чата (по просьбе владельца, например ошибочную ссылку или дубль): target — id чата, field — id источника из context.chats[].sources
+- `source_url_set` — Исправить ссылку источника знаний чата (в ссылке ошибка, документ переехал) и сразу прочитать его заново: target — id чата, field — id источника из context.chats[].sources, value — правильная ссылка того же вида (Google Документ — на документ, Таблица — на таблицу)
 - `site_check` — Проверить заново, на чём сделан сайт чата и как поставить на него чат: target — id чата, value — сайт из его разрешённых сайтов
-- `audience_configure` — Настроить сбор компаний без запуска и без нового поколения: target — id аудитории, payload с target_count/min_contacts, search_plan {cities,regions,languages,synonyms,directory_sources:[{name,url,max_pages}]}, fields, filter_directories и/или overseer {goal,max_target}. Цель ограничена оставшимся месячным лимитом тарифа; token_budget и Maps budget менять нельзя
+- `audience_configure` — Настроить сбор без запуска и без нового поколения (строки сохраняются): target — id аудитории; у любого сбора в интернете (компании, площадки, Telegram, сообщества) — payload {"target_count":N}; только у сбора компаний ещё search_plan {cities,regions,languages,synonyms,directory_sources:[{name,url,max_pages}],exclude}, fields, filter_directories и/или overseer {goal,max_target}. Цель ограничена оставшимся месячным лимитом тарифа; token_budget и Maps budget менять нельзя
 - `audience_row_upsert` — Добавить в существующую аудиторию (сбор компаний, сообществ или площадок) одну найденную вручную организацию или обновить её строку: target — id аудитории, payload — JSON строки (ключ — точный домен организации)
 - `audience_rows_select` — Добавить строки аудитории в избранное или снять отметку: target — id аудитории, payload {"row_ids":[точные ID строк до 200],"selected":true|false,"note":"необязательная заметка","status":"необязательный статус владельца"}
-- `audience_recheck` — Перепроверить существующие строки аудитории компаний на их собственных сайтах без нового поиска и генерации: target — id аудитории, payload — JSON {"scope":"legacy|unverified|all","limit":1..200}; сначала предложить через propose_changes, выполнять только после apply_changes
+- `audience_recheck` — Перепроверить существующие строки аудитории компаний на их собственных сайтах без нового поиска и генерации: target — id аудитории, payload — JSON {"scope":"legacy|unverified|all","limit":1..200,"row_ids":[необязательные точные ID]}; сначала предложить через propose_changes, выполнять только после apply_changes
 - `overseer_create` — Создать ответственного — личность с ролью «ответственный», которая сама проверяет результат сбора и меняет способ поиска (запросы, слова, языки), досбор запускает сама, начать заново только предлагает владельцу: target — id аудитории (роль из её цели) или 0, value — имя (пусто — подберётся), field — пол, payload — дополнение к роли
 - `audience_overseer_set` — Назначить сбору ответственного: target — id аудитории, field — id личности-ответственного (пусто — созданный в этом же наборе), payload — лимиты JSON {"max_iterations","token_budget","deadline_days","no_progress_rounds","min_progress","max_target"} (всё необязательно)
 - `audience_overseer_state` — Ответственный сбора: value — pause (пауза), resume (продолжить) или unlink (отвязать, сбор идёт без него); target — id аудитории
@@ -106,6 +132,7 @@ on apply.
 - `account_secret_set` — Сохранить ключ API, который владелец прислал в чат, в «Ключи и доступы» аккаунта (для всех заданий)
 - `ai_provider_route_set` — Настроить каскад ИИ аккаунта: field — назначение dialog|web_chat|collector|template_review, value — own|platform, payload — JSON маршрута; ключи заранее сохранить через account_secret_set
 - `step_run` — Выполнить разовый шаг на сайте, который действует (отправка, ставка, публикация): создаётся только инструментом MCP step_run, target — его номер; «Применить» запускает ровно предложенные значения
+- `template_run_link` — Создать одноразовую ссылку запуска одобренной версии шаблона: target — id шаблона, payload — JSON с template/template_id, execution_target (where — совместимый псевдоним), worker_id/node_id или device_id, expires_in_hours, preset_inputs, locked_inputs, mode_limits и необязательным публичным HTTPS callback_url; ссылка возвращается только в результате «Применить», который является разрешением владельца на выбранные режимы
 - `template_publish` — Опубликовать одобренную версию пользовательского шаблона для всех клиентов: target — version_id, field — slug, value — public; только после явного выбора владельца и повторной проверки при «Применить»
 - `browser_mcp_allow` — Разрешить или запретить ИИ по MCP открывать страницы в браузере владельца (расширение AI Worker): target — device_id, value — on|off
 - `chat_channel_connect` — Подключить к онлайн-чату собственный аккаунт Telegram, Messenger, Instagram Direct, WhatsApp Business или VK; value — JSON с учётными данными, которые скрываются в ключевом хранилище

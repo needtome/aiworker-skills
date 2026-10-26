@@ -37,6 +37,17 @@
 | `params.email_subject`, `params.email_brief`, `params.email_digest` | | mail of results: subject, short form, one digest per run |
 | `params.summary` | `{every: daily\|weekly, hour}` | a periodic summary of runs |
 | `params.max_results`, `params.max_actions` | int | caps per run |
+| `params.max_actions_per_day` | 0–10000 | external actions per calendar day in the tenant timezone; 0 disables; with warm-up this is the target |
+| `params.warmup_enabled` | bool | ramp this task's daily action quota; requires `max_actions_per_day` ≥ 1 |
+| `params.warmup_days` | 1–60, default 14 | elapsed days from day 0 to the target quota |
+| `params.warmup_start_per_day` | 1–10000 | day-zero quota; default `max(1, round(max_actions_per_day/8))` |
+| `params.warmup_started_at` | `YYYY-MM-DD` | tenant-local start date; set on first enable and retained when the target changes |
+| `params.interval_jitter_percent` | 0–50, default 20 during warm-up | adds a bounded random delay of 0–this percentage to `min_interval_minutes`; never shortens the configured minimum |
+| `params.min_interval_minutes` | 0–40320 | minimum time between external actions across runs; 0 disables |
+| `params.event_max_age_minutes` | 0–40320 | queued webhook/trigger events older than this are skipped as stale; 0 disables expiry |
+| `params.event_overflow` | `keep_newest` \| `keep_oldest` | queue overflow policy; default `keep_oldest` preserves today's behavior |
+| `params.max_queued_events` | 1–500 | maximum queued events for the task |
+| `params.events_per_run` | 1–50 | events taken per run; remaining events stay queued |
 | `params.run_on` | `client_browser` | run in the owner's own browser (AI Worker extension) |
 | `params.no_browser` | `server` \| `wait` | when the owner's browser is offline |
 | `audience_ref` | ref → audience | a Telegram task that takes channels collected on the web |
