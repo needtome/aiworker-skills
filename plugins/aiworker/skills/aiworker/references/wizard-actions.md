@@ -9,7 +9,7 @@ on apply.
 - `plan_recommend` — Рекомендовать один активный тариф ИИ-сотрудника: plan — код тарифа из context.worker_interview.plans, reason — короткая причина по ответам владельца; тариф не оплачивается автоматически
 - `persona_field` — Изменить имя, фамилию, пол или должность личности
 - `persona_create` — Создать личность (консультанта)
-- `persona_assignment_create` — Поставить профессиональную задачу личности: target — id своей доступной личности; payload — JSON {"title":"…","brief":"…","token_budget"?:1000–500000}; создание после «Применить», с повторной серверной проверкой роли, доступа и бюджета
+- `persona_assignment_create` — Поставить профессиональную задачу личности: target — id своей доступной личности; payload — JSON {"title":"…","brief":"…","token_budget"?:1000–500000}; необязательный top-level original_request — точные слова клиента, только если известны; создание после «Применить», с повторной серверной проверкой роли, доступа и бюджета
 - `revision_restore` — Восстановить ревизию задания, коллекции или личности
 - `persona_block_set` — Добавить или изменить обязательный блок ответов личности (persona_ask): field — имя блока, payload — JSON блока
 - `persona_block_remove` — Убрать обязательный блок ответов личности: field — имя блока
@@ -20,8 +20,8 @@ on apply.
 - `server_fix_propose` — Подготовить точный план исправления выбранных находок: target — id прогона, payload JSON {"finding_ids":[...],"safe_only":true|false}
 - `server_fix_apply` — Предложить применение ранее показанного плана: target — id предложения. MCP не может подтверждать высокорисковые пункты; владелец отдельно отмечает каждый такой пункт на странице аудита сервера.
 - `server_fix_rollback` — Предложить откатить подтверждённые исправления из резервных копий: target — id предложения
-- `standing_assignment_create` — Предложить постоянное задание: target — persona_id; payload JSON {title,brief,task_type?,server_id?,settings?,mode:continuous|scheduled,min_interval_minutes?,frequency_unit:hours|days|weekly|months?,frequency_interval?,weekday:1..7?,local_time?,tokens_per_iteration,daily_token_budget,monthly_token_budget,daily_external_actions_limit?,auto_approve_actions?}. Для server_security_audit требуется server_id и личность server_security_auditor. Проверки сайта используют task_type=site_check и settings {type:html|pagespeed|mobile,additional_sites:[URL...]}; тип и роль специалиста проверяются сервером.
-- `standing_assignment_update` — Предложить изменение постоянного задания: target — standing_assignment_id; payload — поля расписания/бюджетов/settings или {state:pause|resume|stop}. Проверки сайта: settings {type:html|pagespeed|mobile,additional_sites:[URL...]} и frequency_unit=hours|days|weekly|months. Создание и изменение применяются только после apply_changes.
+- `standing_assignment_create` — Предложить постоянное задание: target — persona_id; payload JSON {title,brief,task_type?,server_id?,mode:continuous|scheduled,min_interval_minutes?,frequency_unit:hours|days|weekly?,frequency_interval?,weekday:1..7?,local_time?,tokens_per_iteration,daily_token_budget,monthly_token_budget,daily_external_actions_limit?,auto_approve_actions?}. Необязательный top-level original_request — точные слова клиента, только если известны. Для server_security_audit требуется server_id и личность server_security_auditor.
+- `standing_assignment_update` — Предложить изменение постоянного задания: target — standing_assignment_id; payload — поля расписания/бюджетов или {state:pause|resume|stop}. При изменении brief можно передать top-level original_request с точной формулировкой клиента; создание и изменение применяются только после apply_changes.
 - `ai_architecture_report` — Подготовить только отчёт об архитектуре ИИ: payload JSON с description, source_text, source_url, source_worker_id?, probe_permission? и code_source? (GitHub repo/ref/token_secret, публичный GitHub URL или repository_archive file_id); токен передаётся только по имени заранее сохранённого секрета REPO_AUDIT_ либо подключённого сайта GitHub и никогда не кладётся в payload
 - `ai_security_report` — Подготовить только отчёт о безопасности ИИ: payload JSON с description, source_text, source_url, source_worker_id?, probe_permission? и code_source? (GitHub repo/ref/token_secret, публичный GitHub URL или repository_archive file_id); для исходного server-side кода можно указать auditor_role=server_security_auditor; токен передаётся только по имени заранее сохранённого секрета REPO_AUDIT_ либо подключённого сайта GitHub и никогда не кладётся в payload; исправления только после отдельного запроса владельца
 - `specialist_review` — Проанализировать существующий материал выбранной платформенной личности: target — id специалиста; payload JSON с source_url и/или source_text и/или source_ref (knowledge_source:<id>, worker_knowledge_source:<id>, mailing_template:<id>, presentation:<id>, persona_instruction:<id>, chat_greeting:<id>), focus?, lang?=ru|en|uk, format?=html|sheet|doc. Источники и объекты принадлежат этому аккаунту; отчёт только для чтения.
@@ -86,12 +86,12 @@ on apply.
 - `chat_site_remove` — Убрать сайт из «Разрешённых сайтов» чата (value — домен)
 - `source_add` — Добавить в базу знаний сайт, страницу, Google Таблицу или Google Документ (field: site|url|gsheet|gdoc); для сайта payload может содержать smart_prompt, include_paths, exclude_paths; сервер показывает предпросмотр страниц до применения
 - `chat_create` — Создать онлайн-чат
-- `automation_create` — Создать задание на сайте или в Telegram
-- `automation_update` — Изменить задание
+- `automation_create` — Создать задание на сайте или в Telegram; необязательный top-level original_request — точные слова клиента, только если известны
+- `automation_update` — Изменить задание; при изменении goal можно передать top-level original_request с точными словами клиента
 - `webhook_inputs_set` — Настроить входы шаблона из вебхука
 - `automation_targets_add` — Добавить сайты или группы в задание
 - `automation_targets_remove` — Убрать сайты или группы из задания
-- `audience_collect` — Создать сбор в интернете: контакты, сообщества, площадки, YouTube-каналы или исследовательские идеи и кейсы
+- `audience_collect` — Создать сбор в интернете: контакты, сообщества, площадки, YouTube-каналы или исследовательские идеи и кейсы; необязательный top-level original_request — точные слова клиента, только если известны
 - `audience_start` — Запустить или продолжить сбор (аудитория из context.audiences); payload research: {"token_budget":N,"review_drafts":true} — продолжить исследование с учётом прежнего расхода или проверить сохранённые черновики
 - `audience_pause` — Поставить сбор контактов на паузу
 - `audience_finish` — Завершить сбор контактов сейчас (собранное остаётся)
@@ -99,7 +99,7 @@ on apply.
 - `audience_unarchive` — Вернуть аудиторию из архива на паузу без автоматического запуска сбора: target — id аудитории
 - `audience_restart` — Начать поддерживаемый сбор полностью заново: новое поколение с нуля (прежний результат сохраняется; исследовательские коллекции заново запускаются созданием отдельной коллекции)
 - `audience_restore` — Сделать текущим сохранённое поколение аудитории (field — номер поколения)
-- `audience_description` — Описание сбора и критерии владельца: target — id аудитории, field — set (заменить) или append (дописать), value — текст до 20000 символов. Планировщик запросов и оценка соответствия читают описание; само описание не запускает сбор и не меняет цель или строки
+- `audience_description` — Описание сбора и критерии владельца: target — id аудитории, field — set (заменить) или append (дописать), value — текст до 20000 символов. Для уточнения можно передать top-level original_request с точными словами клиента. Планировщик запросов и оценка соответствия читают описание; само описание не запускает сбор и не меняет цель или строки
 - `helper_attach` — Прикрепить платформенного помощника к своему сбору или заданию: field — audience|automation_task, target — id объекта, payload — JSON {"step":"search_plan|quality_review|texts","platform_role":"ключ роли","token_budget_month":50000,"token_budget_run":8000,"auto_apply":false}; роли берутся из helper_catalog в get_account. Доступны на Max или с дополнением «Специалисты Max»
 - `helper_update` — Изменить помощника: target — id из audience_status.helpers/task_status.helpers, payload — JSON со status active|paused, token_budget_month, token_budget_run и auto_apply (только search_plan)
 - `helper_detach` — Снять помощника с объекта, сохранив журнал: target — id из audience_status.helpers/task_status.helpers
@@ -131,6 +131,8 @@ on apply.
 - `automation_share_revoke` — Отозвать ссылку «Поделиться» задания (одну или все)
 - `automation_install_shared` — Установить себе задание по ссылке «Поделиться» (копия встанет на проверку)
 - `account_secret_set` — Сохранить ключ API, который владелец прислал в чат, в «Ключи и доступы» аккаунта (для всех заданий)
+- `account_variable_set` — Создать или изменить переменную аккаунта для повторного использования в заданиях: field — имя A-Z/0-9/_, value — значение из слов владельца, payload — JSON {label,sensitive}
+- `account_variable_delete` — Удалить переменную аккаунта после подтверждения владельца: field — имя A-Z/0-9/_
 - `ai_provider_route_set` — Настроить каскад ИИ аккаунта: field — назначение dialog|web_chat|collector|template_review, value — own|platform, payload — JSON маршрута; ключи заранее сохранить через account_secret_set
 - `step_run` — Выполнить разовый шаг на сайте, который действует (отправка, ставка, публикация): создаётся только инструментом MCP step_run, target — его номер; «Применить» запускает ровно предложенные значения
 - `template_run_link` — Создать одноразовую ссылку запуска одобренной версии шаблона: target — id шаблона, payload — JSON с template/template_id, execution_target (where — совместимый псевдоним), worker_id/node_id или device_id, expires_in_hours, preset_inputs, locked_inputs, mode_limits и необязательным публичным HTTPS callback_url; ссылка возвращается только в результате «Применить», который является разрешением владельца на выбранные режимы

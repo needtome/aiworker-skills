@@ -2,9 +2,11 @@
 
 Generated from the server's catalogue — the same list the AI Worker editor and its own AI use. A program is
 `{"start_url": "https://…", "steps": [ {"op": "…", …}, … ]}`. Values may use variables: `{{item.title}}`,
-`{{d.reply}}`, `{{params.profile}}`, filters `{{query|url}}`, `{{list|count}}`, `{{x|json}}`. Keys only as
-`{{secret.NAME}}` (and only in `api` steps). Steps marked «kind: web» are for site tasks, «telegram» for Telegram tasks,
-«common» for both. A step that sends something (`submit: true`, `tg_send`) runs only after a `decide` allowed it.
+`{{d.reply}}`, `{{params.profile}}`, filters `{{query|url}}`, `{{list|count}}`, `{{x|json}}`. Account-wide reusable values are
+`{{account.NAME}}`; read-only profile values are `{{company.name}}`, `{{company.site}}`, `{{company.email}}`, and `{{owner.name}}`.
+Only referenced global values are sent to the task runtime; missing values block the run, and values marked personal are
+masked in runtime logs and reports. Keys only as `{{secret.NAME}}` (and only in `api` steps). Steps marked «kind: web» are for
+site tasks, «telegram» for Telegram tasks, «common» for both. A step that sends something (`submit: true`, `tg_send`) runs only after a `decide` allowed it.
 
 ## Semantic field bindings
 

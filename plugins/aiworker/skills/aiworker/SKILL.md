@@ -254,6 +254,14 @@ fallback setting is enabled; otherwise provider errors or exhausted quotas end t
 million tokens where the provider/model price is configured; otherwise cost is shown as unknown and tokens are still
 counted. `value: "platform"` in `ai_provider_route_set` returns the whole account to platform models.
 
+**Reusable account values for tasks (ADR 249).** Settings → Variables stores values such as a phone number or name,
+separate from API keys. Refer to them as `{{account.NAME}}` in task goals, scenario steps, template inputs and gallery
+values. Only referenced values are sent to a runtime job. Mark personal values as sensitive so their values are redacted
+from task logs and reports. The built-in read-only profile references are `{{company.name}}`, `{{company.site}}`,
+`{{company.email}}` and `{{owner.name}}`; a missing value blocks the run and points to the account settings. The connected
+assistant can read the list (sensitive values are masked to the last two characters) and can propose account_variable_set
+or account_variable_delete, but the owner must apply the proposal.
+
 **Messenger numbers.** The customer's own number is included in the plan and is connected from the panel or with the
 `channel_account_connect` action through `propose_changes` / `apply_changes`. An AI Worker SIM costs $5 per month per
 physical number; one SIM can carry one account in each selected channel (WhatsApp, Telegram, imo and MAX). imo/MAX
