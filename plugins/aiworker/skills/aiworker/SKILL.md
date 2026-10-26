@@ -69,6 +69,12 @@ Telegram Mini App wizard. MCP and Telegram keep the same tenant boundary and pro
 This public skill connects to the client's own account only. Keep account changes within its tenant and use
 `propose_changes` → `apply_changes`; platform administration is outside this client skill.
 
+**Subscription periods (ADR 250).** `get_account().billing` reports `period`, `period_end`, the current monthly price,
+the annual price and discount, and `next_renewal_period`. Plan recommendations include both monthly and yearly prices and
+checkout links. `plan_recommend` may include `payload: {"period":"month"}` or `{"period":"year"}`; applying it returns
+a checkout link for that period and does not charge the account. The annual price is 12 monthly prices less the configured
+platform discount (20% by default). Monthly plan limits continue to reset each month during an annual subscription.
+
 **Max specialists add-on (ADR 197).** Read `get_account().specialists_addon` for eligibility, active/cancel-at-period-end state,
 USD monthly account price and the roles it unlocks. Max includes every catalog role marked `max_only`; other paid plans can
 request the account add-on. Show the current-period prorated amount and later monthly price from the proposal, call
@@ -646,6 +652,12 @@ absent secondary conditions do not reject a technically fitting item.
 - A chat is made in the panel form's steps: 1) a persona — an existing one or a new one (name and gender, or generated);
   2) its role; 3) knowledge, optional. No chat name (it becomes «Чат N») and no site address are needed; a chat without
   sources answers from a role of 40+ characters, with sources only from them.
+- At the final installation step, offer three options: embed code, WordPress plugin, or free installation by AI Worker.
+  For the free option, propose `chat_install_request` with `target: chat_id, field: "free"`, show the summary, and call
+  `apply_changes` only after the owner agrees. It returns a link to the protected form in the panel. Never ask for or pass
+  site logins/passwords/application passwords through MCP or chat. In the form, the owner can add a temporary WordPress
+  administrator, invite the platform email shown in settings to a site builder (no password), or provide a temporary
+  FTP/SFTP account; the panel explains how to remove temporary access after installation.
 - Connected: one batch — `persona_create` (value «Имя Фамилия» or empty to generate, field `female|male|other`, payload =
   the role) or `persona_instruction_replace` for an existing persona; `chat_create` (value empty, target = the persona id
   or 0 for the one created in the batch); `source_add` / `faq_add` with target 0 for the new chat — they go to its persona.
