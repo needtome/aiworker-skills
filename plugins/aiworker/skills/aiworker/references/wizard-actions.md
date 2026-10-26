@@ -88,6 +88,7 @@ on apply.
 - `chat_create` — Создать онлайн-чат
 - `automation_create` — Создать задание на сайте или в Telegram
 - `automation_update` — Изменить задание
+- `webhook_inputs_set` — Настроить входы шаблона из вебхука
 - `automation_targets_add` — Добавить сайты или группы в задание
 - `automation_targets_remove` — Убрать сайты или группы из задания
 - `audience_collect` — Создать сбор в интернете: контакты, сообщества, площадки, YouTube-каналы или исследовательские идеи и кейсы
