@@ -32,6 +32,7 @@
 | `params.daily_at` | "HH:MM" | every day at this exact time (the AI employee's time zone), no jitter; use it when the owner names a time («every day at 7 am»); `every_minutes` and `hours_*` are then ignored |
 | `hours_from`, `hours_to` | `HH:MM` | working hours (the account's time zone) |
 | `webhook` | bool | the task gets a webhook address (made on import); the program reads the list `events` |
+| `trigger_template` | object | optional task start source (`crm`, `sheet`, `mail`, `webhook`, `telegram`, `rss`, `page_change`, `internal`); imported as a template until the owner reconnects it and enables it |
 | `results_off` | bool | do not send results anywhere |
 | `params.profile` | string | about the owner — used in replies and decisions ("I am a Laravel developer, 8 years…") |
 | `params.email_subject`, `params.email_brief`, `params.email_digest` | | mail of results: subject, short form, one digest per run |
@@ -60,6 +61,16 @@
 After import, started (the default through MCP and the API, «Сразу запустить» in the panel): with `program` the task
 is switched on and runs; without it AI Worker's AI explores the sites, writes the scenario and runs the task. Not started
 (`activate: false`): a task with `program` waits «на проверке», `mode: auto` comes in as `draft`.
+
+### Portable task trigger template
+
+`trigger_template` carries source settings and filters, never a mailbox or bot account id, webhook URL or shared secret.
+For mail it may include a mailbox address, but the imported owner selects an account again; a trigger-only mailbox can be
+used without letting the AI employee answer mail there. Telegram imports retain the bot username and target, then require a
+connected bot to be selected. Webhook templates retain the auth mode, header name and payload filters; if auth is enabled,
+the secret must be entered again. RSS and page URLs are revalidated by the safe fetcher at setup. `internal` task-result
+sources use `source_task_ref`, so import can link tasks in the same file and reject loops. The template is saved separately
+from the active trigger until the owner configures the missing connection and presses «Enable trigger».
 
 ## kind: web_chat — a chat widget for a site
 

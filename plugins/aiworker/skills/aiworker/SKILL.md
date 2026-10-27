@@ -583,6 +583,21 @@ version pinning, parameters, runtime limits, provenance and ordinary collection 
 
 ## Working with tasks
 
+**Start a task from an app or an AI Worker event (ADR 259).** Set `trigger` in `automation_create` / `automation_update`
+or use the task's «Триггер» panel tab. Supported types are `crm`, `sheet`, `mail`, `webhook`, `telegram`, `rss`,
+`page_change` and `internal`. CRM, Sheets and mail use a per-plan poll; RSS and page changes use the safe public-URL fetcher
+and `plans.limits.trigger_poll_minutes`. Webhooks, Telegram bot updates and internal events wake the task immediately.
+Mail filters are `from`, `to`, `subject`, `body`, `has_attachment`, `subject_any` and `body_any`; text checks are plain,
+case-insensitive contains, and each word list matches any word. The mailbox connects once through IMAP with an app password;
+`trigger_only` leaves it available to triggers and excludes it from AI replies. The panel can preview the latest mail samples.
+An inbound webhook gets its URL from the task panel; it accepts JSON and can check a shared header, AI Worker HMAC, Stripe,
+Shopify or GitHub signature plus `payload_filters` (`path`, `contains|equals`). The editor retains a redacted last payload as
+the example. Presets explain setup for Tilda, Google Forms Apps Script, Stripe, Shopify, GitHub, WP Webhooks and Zapier/Make/n8n.
+Telegram watches a group/channel that the account's online-chat bot can read. RSS/Atom covers YouTube channels, blogs and
+Google Alerts. `page_change` compares normalized page text, optionally selected with CSS. `internal` includes new dialogs,
+messages and leads, human handoff, results from another task, approvals, subscription payments and completed audience runs.
+Task-result chains are checked for cycles. Every trigger event is queued once and the task reads it from `events`.
+
 - **Create.** File mode: a `task` item (see `references/bundle-format.md`). Connected: action `automation_create` with the
   payload from `guide`. AI Worker's own AI then opens the sites, writes the scenario and shows it to the owner; a task
   with a scenario from a file waits «на проверке» until the owner switches it on (`automation_activate`).

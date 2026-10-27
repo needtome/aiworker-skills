@@ -520,6 +520,131 @@
                                         "type": "boolean",
                                         "description": "a new webhook address is made; the program reads the list «events»"
                                     },
+                                    "trigger_template": {
+                                        "type": "object",
+                                        "description": "portable trigger settings; mailboxes, bots and webhook secrets must be connected again",
+                                        "properties": {
+                                            "type": {
+                                                "enum": [
+                                                    "crm",
+                                                    "sheet",
+                                                    "mail",
+                                                    "webhook",
+                                                    "telegram",
+                                                    "rss",
+                                                    "page_change",
+                                                    "internal"
+                                                ]
+                                            },
+                                            "every": {
+                                                "type": "integer",
+                                                "minimum": 1,
+                                                "maximum": 1440
+                                            },
+                                            "object": {
+                                                "enum": [
+                                                    "lead",
+                                                    "deal"
+                                                ]
+                                            },
+                                            "spreadsheet": {
+                                                "type": "string",
+                                                "maxLength": 500
+                                            },
+                                            "sheet": {
+                                                "type": "string",
+                                                "maxLength": 100
+                                            },
+                                            "mailbox": {
+                                                "type": "string",
+                                                "maxLength": 190
+                                            },
+                                            "from": {
+                                                "type": "string",
+                                                "maxLength": 500
+                                            },
+                                            "to": {
+                                                "type": "string",
+                                                "maxLength": 500
+                                            },
+                                            "subject": {
+                                                "type": "string",
+                                                "maxLength": 500
+                                            },
+                                            "body": {
+                                                "type": "string",
+                                                "maxLength": 500
+                                            },
+                                            "has_attachment": {
+                                                "type": "boolean"
+                                            },
+                                            "subject_any": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string",
+                                                    "maxLength": 100
+                                                }
+                                            },
+                                            "body_any": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string",
+                                                    "maxLength": 100
+                                                }
+                                            },
+                                            "auth": {
+                                                "enum": [
+                                                    "none",
+                                                    "header",
+                                                    "hmac",
+                                                    "stripe",
+                                                    "shopify",
+                                                    "github"
+                                                ]
+                                            },
+                                            "secret_header": {
+                                                "type": "string",
+                                                "maxLength": 100
+                                            },
+                                            "payload_filters": {
+                                                "type": "array"
+                                            },
+                                            "bot": {
+                                                "type": "string",
+                                                "maxLength": 80
+                                            },
+                                            "target": {
+                                                "type": "string",
+                                                "maxLength": 100
+                                            },
+                                            "keywords": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string",
+                                                    "maxLength": 100
+                                                }
+                                            },
+                                            "url": {
+                                                "type": "string",
+                                                "pattern": "^https?://"
+                                            },
+                                            "selector": {
+                                                "type": "string",
+                                                "maxLength": 250
+                                            },
+                                            "event": {
+                                                "type": "string",
+                                                "maxLength": 100
+                                            },
+                                            "source_task_ref": {
+                                                "type": "string",
+                                                "pattern": "^[A-Za-z0-9_.-]{1,40}$"
+                                            },
+                                            "needs_secret": {
+                                                "type": "boolean"
+                                            }
+                                        }
+                                    },
                                     "results_off": {
                                         "type": "boolean"
                                     },
@@ -682,7 +807,7 @@
                                     },
                                     "program": {
                                         "type": "object",
-                                        "description": "optional scenario: {start_url?, steps:[{op, …}]}; ops: use, collection_algorithm, goto, back, reload, check_auth, page_state, dismiss, click, click_text, type, set_value, clear, select, check, press, hover, mouse, scroll, wait, wait_until, get, extract, extract_list, feed, fetch, api, tgstat, telemetr, apify, json_list, storage_get, open_tab, close_tab, download, upload, screenshot, tg_join, tg_fetch, tg_search, tg_send, tg_discover, add_target, audience_fetch, youtube, for_each, if, repeat, break, try, call, jump, pause, stop, set, calc, regex, date, match, filter, dedupe, push, keep, decide, ai, save, notify, agent. Account values use {{account.NAME}}; profile values use {{company.name}}, {{company.site}}, {{company.email}}, {{owner.name}}; API keys remain {{secret.NAME}}. Without a program the AI writes it.",
+                                        "description": "optional scenario: {start_url?, steps:[{op, …}]}; ops: use, collection_algorithm, goto, back, reload, check_auth, page_state, dismiss, click, click_text, type, set_value, clear, select, check, press, hover, mouse, scroll, wait, wait_until, get, extract, extract_list, feed, fetch, api, tgstat, telemetr, apify, json_list, storage_get, open_tab, close_tab, download, upload, screenshot, tg_join, tg_fetch, tg_search, tg_send, tg_discover, add_target, audience_fetch, youtube, for_each, if, repeat, break, try, call, jump, pause, stop, set, calc, regex, date, match, filter, dedupe, push, keep, decide, ai, save, notify, agent, persona_audit. Account values use {{account.NAME}}; profile values use {{company.name}}, {{company.site}}, {{company.email}}, {{owner.name}}; API keys remain {{secret.NAME}}. Without a program the AI writes it.",
                                         "properties": {
                                             "start_url": {
                                                 "type": "string"
@@ -764,7 +889,8 @@
                                                                 "ai",
                                                                 "save",
                                                                 "notify",
-                                                                "agent"
+                                                                "agent",
+                                                                "persona_audit"
                                                             ]
                                                         }
                                                     }

@@ -296,7 +296,7 @@ Scrolls the page or a single block (a chat list, a message feed): down, up, to t
 |---|---|---|
 | `algorithm` | s | Algorithm — e.g. `google_maps_business` |
 | `params_json` | t | Параметры JSON — e.g. `{}` |
-| `into` | s | Переменная результата — e.g. `items` |
+| `into` | s | Result variable — e.g. `items` |
 
 ```json
 {"op":"collection_algorithm","algorithm":"google_maps_business","params_json":"{\"niche\":\"кафе\",\"city\":\"София\",\"limit\":3}","into":"items"}
