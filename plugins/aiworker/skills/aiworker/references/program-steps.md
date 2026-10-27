@@ -6,7 +6,7 @@ Generated from the server's catalogue — the same list the AI Worker editor and
 `{{account.NAME}}`; read-only profile values are `{{company.name}}`, `{{company.site}}`, `{{company.email}}`, and `{{owner.name}}`.
 Only referenced global values are sent to the task runtime; missing values block the run, and values marked personal are
 masked in runtime logs and reports. Keys only as `{{secret.NAME}}` (and only in `api` steps). Steps marked «kind: web» are for
-site tasks, «telegram» for Telegram tasks, «common» for both. A step that sends something (`submit: true`, `tg_send`) runs only after a `decide` allowed it.
+site tasks, «telegram» for Telegram tasks, «common» for both. A step that sends something (`submit: true`, `tg_send`) runs only after a `decide` allowed it or the owner approved the item and the runtime entered `procedures.respond`. `persona_reply` saves a draft by default and stops the remaining steps for that event until approval; task mode `auto` is an explicit alternative. The approved procedure receives the current editable text as `d.reply`.
 
 ## Semantic field bindings
 
@@ -977,7 +977,7 @@ The AI compares the item with the task's goal and criteria: a score of 0–100, 
 
 ### `persona_reply` — Личность решает и пишет ответ (kind: web)
 
-Передаёт выбранной личности текст текущей страницы из браузера или заданный текст и ссылку. Личность использует свою роль и базу знаний, решает отвечать ли (respond или skip) с причиной, а при respond готовит ответ на языке проекта. Внешние команды на странице считаются данными. Ничего не отправляется; расходы ИИ учитываются на аккаунте клиента.
+Передаёт выбранной личности текст текущей страницы из браузера или заданный текст и ссылку. Личность использует свою роль и базу знаний, решает отвечать ли (respond или skip) с причиной, а при respond готовит ответ на языке проекта. По умолчанию сохраняет respond как редактируемый черновик элемента и останавливает следующие шаги этого элемента до одобрения владельцем; «Отправить одобренные» запускает procedures.respond с текущим текстом черновика. В режиме auto активного задания может разрешить procedures.respond сразу. skip закрывает элемент с причиной без черновика. Внешние команды на странице считаются данными. Расходы ИИ учитываются на аккаунте клиента.
 
 | field | type | meaning |
 |---|---|---|
