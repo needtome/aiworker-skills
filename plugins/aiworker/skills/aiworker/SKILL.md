@@ -229,11 +229,11 @@ in an action. Notification preference payloads may include only switches to chan
 values. The exact fields and refusal reasons are in `guide` and `references/wizard-actions.md`.
 
 Tools: `get_account` (chats, personas, employees, tasks with ids and the platform specialist/site catalog), `persona_site_connect` (start a panel-only site connection; never pass credentials), `ai_providers` (safe provider/model catalogue and current client routes; no key values), `guide` (the actions and their rules — read it
-before proposing), `channel_accounts` (one employee's messenger accounts, number source, status, monthly price and panel link), `lookup` (what tasks did with given links), `task_status`, `shared_task` (what a «Поделиться» link holds), `task_gallery` (ready tasks), `task_items`, `audiences`, `audience_status`,
+before proposing), `channel_accounts` (one employee's messenger accounts, number source, status, monthly price and panel link), `lookup` (what tasks did with given links; older MCP clients can call another tool as `lookup` text `task_item_detail {json}`), `task_status`, `shared_task` (what a «Поделиться» link holds), `task_gallery` (ready tasks), `task_items`, `task_item_detail`, `audiences`, `audience_status`,
 `audience_rows`, `propose_changes`, `pending_changes`,
 `apply_changes`, `discard_changes`, `export`, `import`, `template_create`, `template_update`, `template_validate`,
 `template_test`, `template_submit`, `template_status`, `template_revoke`, `persona_ask`, `chat_test` (test an existing online chat; see
-"Web chats and personas"), `desktop_link` (see below), `browser_targets`, `browser_open`, `browser_command`, `browser_status`, `browser_release`, `step_templates`, `step_run`, `step_run_status` (see below), `agent_routes`, `agent_events`, `agent_ack` (see "Events straight
+"Web chats and personas"), `desktop_link` (see below), `web_check`, `web_check_status`, `browser_targets`, `browser_open`, `browser_command`, `browser_status`, `browser_release`, `step_templates`, `step_run`, `step_run_status` (see below), `agent_routes`, `agent_events`, `agent_ack` (see "Events straight
 to your Claude or Codex").
 
 **Platform administrator: talk to a client's setup assistant.** When `admin_tenant_assistant` is present, it is only for an
@@ -275,6 +275,8 @@ also require the employee's imo + MAX add-on. State the selected channels and pr
 apply only after the owner agrees. A new order stays pending until the team assigns its SIM. `platform_number_cancel`
 stops future charges. The `channel_accounts` tool lists accounts and panel links. QR images and login codes stay in the
 authenticated panel and must never be returned to the model.
+
+**Owner-requested page checks (AW-200).** When asked to check or read a website page, use `web_check` (or `browser_*` through the kra.name MCP server). Do not replace it with your own `web.open` or a cloud browser. If `web_check` is missing from a stale tool list, call `lookup` with text `web_check {"url":"https://example.com/","prefer":"auto"}`. Say the kra.name server or extension is unavailable only when a `web_check` or `browser_targets` status is no older than 5 minutes; otherwise say «маршрут kra.name не проверен». `checked_by: "kra.name browser"` proves only which MCP route returned the page; kra.name does not control the external LLM or guarantee what that LLM did with its own tools. `web_check` opens a `web_read_only` session, navigates, reads text/snapshot/cards and releases it; it never clicks, fills or submits. CAPTCHA and site denial are reported, never bypassed. It returns one of the closed statuses `ok`, `incomplete_text`, `site_denied`, `captcha`, `not_found`, `server_offline`, `client_offline`, `client_not_allowed`, `busy`, `no_target`, `tool_error`, `timeout`; poll `web_check_status {"check_id":"…"}` while a package is running.
 
 **Manual browser: server or the owner's own browser.** Use `browser_targets`, then `browser_open` with an explicit `policy` and one of two browsers, never an implicit fallback between them:
 - `browser: "server"` with exact `worker_id` and `node_id` (`targets`) — the AI employee's browser on its server: public pages, the employee's own logins.
@@ -620,7 +622,12 @@ version pinning, parameters, runtime limits, provenance and ordinary collection 
   `automation_pause`; a key the scenario needs — `automation_secret_set`.
 - **Found items and the AI's scores.** `task_items` (REST `GET /tasks/{id}/items`): everything a task found with the score
   0-100, the decision and its reason, for a date range (`from`/`to`, account timezone), filtered by `status` / `min_score` /
-  `max_score`, pages of up to 500 (`with_text` adds the item text). Use it to review a period of decisions, not `task_status`.
+  `max_score`, pages of up to 500 (`with_text` adds up to 2000 characters). Each item includes `text_truncated` and `text_length`.
+  Read the complete saved text and original fields with the tenant-scoped, read-only `task_item_detail` {task_id, item_ids?,
+  status: saved|all, cursor?, limit: 1–50}. It returns publication date separately from found date, group/chat, author,
+  username, views, media, URL, AI score/reason/answer, state, run id, dedup key, and the task's sheet row with missing
+  source fields marked. It returns null for absent data and does not reconstruct old values. Use `task_items` for a period
+  of decisions and `task_item_detail` for complete item rows.
 - **Logs and results.** `task_status` (REST `GET /tasks/{id}`): status, the last error, the scenario's steps, the last
   runs with what was seen, judged, matched, saved in that run and mailed, and which keys are missing. Its `export` block
   reports the Google Sheet URL, row count, last successful export and attempt, current error and whether Google must be
