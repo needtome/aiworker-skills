@@ -397,7 +397,7 @@ Body: `{"name":"string","data_base64":"string","source_url":"string","task_id":"
 
 ## Плагин WordPress
 
-Мастер настройки и статистика онлайн-чатов в админке плагина AI Worker Chat. Вход — OAuth 2.1 + PKCE со scope=chat (регистрация POST /app/api/oauth/register, затем /app/oauth/authorize): токен открывает только онлайн-чаты, личности, FAQ, базу знаний, статистику и расход токенов ИИ; задания, ИИ-сотрудники, мессенджеры, оплата и ключи ему закрыты. Подходит и API-ключ.
+Мастер настройки и статистика онлайн-чатов используют scope=chat; генерация изображений — scope=images (OAuth 2.1 + PKCE) или API-ключ аккаунта. Токен images открывает только /images и не даёт доступ к чатам или ключу API.
 
 ### `GET /plugin/me`
 
@@ -435,6 +435,34 @@ Body: `{"text":"string","chat_id":"integer"}`, required: text
 - `period` (query) — month — с 1-го числа текущего месяца
 - `from` (query)
 - `to` (query)
+
+## Генерация изображений WordPress
+
+Асинхронная генерация, история только своего аккаунта, отмена и временная ссылка на готовый файл.
+
+### `POST /images`
+
+Поставить в очередь изображение для записи WordPress
+
+Модерация выполняется до постановки. Лимиты: 20 заданий в сутки и 6 на post_id. Токены списываются только после успешной генерации. 1.91:1 возвращается как 1200×630. Повторите тот же idempotency_key в течение 24 часов, чтобы получить то же задание.
+
+Body: `{"brief":"string","post_title":"string","post_excerpt":"string","post_id":"integer","purpose":"string","aspect":"string","quality":"string","format":"string","lang":"string","idempotency_key":"string"}`, required: brief, idempotency_key
+
+### `GET /images`
+
+История изображений своего аккаунта
+- `limit` (query)
+- `cursor` (query) — id из next_cursor; выдаёт более старые задания
+
+### `GET /images/{id}`
+
+Статус задания и ссылка на готовый файл
+- `id` (path, required)
+
+### `POST /images/{id}/cancel`
+
+Отменить ожидающее задание
+- `id` (path, required)
 
 ## ИИ-агенты
 
