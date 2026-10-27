@@ -137,9 +137,16 @@ agrees. Use `standing_assignment_update` to change those settings or set `payloa
 Creation and updates never take effect before apply.
 
 `mode: "continuous"` starts the next normal persona assignment after the previous one finishes and the configured
-minimum pause. `mode: "scheduled"` supports `frequency_unit: "hours" | "days" | "weekly"`; daily/weekly schedules use
-`local_time` and the account timezone, with `weekday` 1 (Monday) through 7 (Sunday) for weekly runs. Each iteration
-reuses the regular bounded persona executor. It receives server-maintained memory and completed action keys, continues
+minimum pause. `mode: "scheduled"` supports `frequency_unit: "hours" | "days" | "weekly" | "months"`; daily, weekly
+and monthly schedules use `local_time` and the account timezone, with `weekday` 1 (Monday) through 7 (Sunday) for weekly runs.
+For `task_type: "persona_audit"`, use one catalog `audit_id` and put its `sites` and optional `lang` in `settings`.
+Repeated `standing_assignment_create` proposals for the same persona and audit update one reusable standing row; use
+`standing_assignment_update` to change its sites or schedule, or pause it. The architecture auditor includes the
+`ai_architecture_site` report-only audit; schedule it weekly or monthly in the specialist panel. A run reads the selected
+public URLs with SSRF protection and records page evidence. `probe_permission: "safe_read_only"` opts in to at most two
+neutral questions through the existing online-chat preview; replies count against the account AI allowance. `apply_changes`
+returns an assignment link for catalog runs and queues `ai_architecture_report`, whose output page shows queued/failed state.
+Each iteration reuses the regular bounded persona executor. It receives server-maintained memory and completed action keys, continues
 open work, and must explain how a new task differs from completed work. The server rejects duplicate action keys, keeps
 the external-action limit, and pauses on an exhausted budget or three consecutive errors.
 

@@ -100,6 +100,121 @@
                                                             "type": "string",
                                                             "maxLength": 50000,
                                                             "description": "FAQ as «Вопрос: …\\nОтвет: …» pairs or free text"
+                                                        },
+                                                        "professional_mode": {
+                                                            "type": "boolean"
+                                                        },
+                                                        "chunking_profile": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "version": {
+                                                                    "const": 1
+                                                                },
+                                                                "mode": {
+                                                                    "enum": [
+                                                                        "auto",
+                                                                        "headings",
+                                                                        "separator",
+                                                                        "blocks",
+                                                                        "records",
+                                                                        "table_rows",
+                                                                        "fixed",
+                                                                        "fixed_no_overlap",
+                                                                        "semantic"
+                                                                    ]
+                                                                },
+                                                                "heading_levels": {
+                                                                    "type": "array",
+                                                                    "maxItems": 3,
+                                                                    "items": {
+                                                                        "enum": [
+                                                                            1,
+                                                                            2,
+                                                                            3
+                                                                        ]
+                                                                    }
+                                                                },
+                                                                "separator": {
+                                                                    "type": "string",
+                                                                    "maxLength": 200
+                                                                },
+                                                                "max_chunk_size": {
+                                                                    "type": "integer",
+                                                                    "minimum": 100,
+                                                                    "maximum": 12000
+                                                                },
+                                                                "size_unit": {
+                                                                    "enum": [
+                                                                        "chars",
+                                                                        "tokens"
+                                                                    ]
+                                                                },
+                                                                "overlap": {
+                                                                    "type": "integer",
+                                                                    "minimum": 0,
+                                                                    "maximum": 11999
+                                                                },
+                                                                "strip_boilerplate": {
+                                                                    "type": "array",
+                                                                    "maxItems": 80,
+                                                                    "items": {
+                                                                        "type": "string",
+                                                                        "maxLength": 500
+                                                                    }
+                                                                },
+                                                                "metadata_lines": {
+                                                                    "type": "boolean"
+                                                                },
+                                                                "language": {
+                                                                    "enum": [
+                                                                        "auto",
+                                                                        "ru",
+                                                                        "en",
+                                                                        "uk"
+                                                                    ]
+                                                                },
+                                                                "title_columns": {
+                                                                    "type": "array",
+                                                                    "maxItems": 40,
+                                                                    "items": {
+                                                                        "type": "string",
+                                                                        "maxLength": 100
+                                                                    }
+                                                                },
+                                                                "include_columns": {
+                                                                    "type": "array",
+                                                                    "maxItems": 100,
+                                                                    "items": {
+                                                                        "type": "string",
+                                                                        "maxLength": 100
+                                                                    }
+                                                                },
+                                                                "group_rows": {
+                                                                    "type": "integer",
+                                                                    "minimum": 1,
+                                                                    "maximum": 100
+                                                                },
+                                                                "record_boundary": {
+                                                                    "type": "string",
+                                                                    "maxLength": 200
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "version",
+                                                                "mode"
+                                                            ]
+                                                        },
+                                                        "retrieval_profile": {
+                                                            "enum": [
+                                                                "balanced",
+                                                                "catalog",
+                                                                "meaning"
+                                                            ]
+                                                        },
+                                                        "embedding_model": {
+                                                            "enum": [
+                                                                "bge-m3"
+                                                            ]
                                                         }
                                                     },
                                                     "required": [
@@ -138,6 +253,121 @@
                                                                 7,
                                                                 14,
                                                                 30
+                                                            ]
+                                                        },
+                                                        "professional_mode": {
+                                                            "type": "boolean"
+                                                        },
+                                                        "chunking_profile": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "version": {
+                                                                    "const": 1
+                                                                },
+                                                                "mode": {
+                                                                    "enum": [
+                                                                        "auto",
+                                                                        "headings",
+                                                                        "separator",
+                                                                        "blocks",
+                                                                        "records",
+                                                                        "table_rows",
+                                                                        "fixed",
+                                                                        "fixed_no_overlap",
+                                                                        "semantic"
+                                                                    ]
+                                                                },
+                                                                "heading_levels": {
+                                                                    "type": "array",
+                                                                    "maxItems": 3,
+                                                                    "items": {
+                                                                        "enum": [
+                                                                            1,
+                                                                            2,
+                                                                            3
+                                                                        ]
+                                                                    }
+                                                                },
+                                                                "separator": {
+                                                                    "type": "string",
+                                                                    "maxLength": 200
+                                                                },
+                                                                "max_chunk_size": {
+                                                                    "type": "integer",
+                                                                    "minimum": 100,
+                                                                    "maximum": 12000
+                                                                },
+                                                                "size_unit": {
+                                                                    "enum": [
+                                                                        "chars",
+                                                                        "tokens"
+                                                                    ]
+                                                                },
+                                                                "overlap": {
+                                                                    "type": "integer",
+                                                                    "minimum": 0,
+                                                                    "maximum": 11999
+                                                                },
+                                                                "strip_boilerplate": {
+                                                                    "type": "array",
+                                                                    "maxItems": 80,
+                                                                    "items": {
+                                                                        "type": "string",
+                                                                        "maxLength": 500
+                                                                    }
+                                                                },
+                                                                "metadata_lines": {
+                                                                    "type": "boolean"
+                                                                },
+                                                                "language": {
+                                                                    "enum": [
+                                                                        "auto",
+                                                                        "ru",
+                                                                        "en",
+                                                                        "uk"
+                                                                    ]
+                                                                },
+                                                                "title_columns": {
+                                                                    "type": "array",
+                                                                    "maxItems": 40,
+                                                                    "items": {
+                                                                        "type": "string",
+                                                                        "maxLength": 100
+                                                                    }
+                                                                },
+                                                                "include_columns": {
+                                                                    "type": "array",
+                                                                    "maxItems": 100,
+                                                                    "items": {
+                                                                        "type": "string",
+                                                                        "maxLength": 100
+                                                                    }
+                                                                },
+                                                                "group_rows": {
+                                                                    "type": "integer",
+                                                                    "minimum": 1,
+                                                                    "maximum": 100
+                                                                },
+                                                                "record_boundary": {
+                                                                    "type": "string",
+                                                                    "maxLength": 200
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "version",
+                                                                "mode"
+                                                            ]
+                                                        },
+                                                        "retrieval_profile": {
+                                                            "enum": [
+                                                                "balanced",
+                                                                "catalog",
+                                                                "meaning"
+                                                            ]
+                                                        },
+                                                        "embedding_model": {
+                                                            "enum": [
+                                                                "bge-m3"
                                                             ]
                                                         }
                                                     },
@@ -283,6 +513,121 @@
                                                             "type": "string",
                                                             "maxLength": 50000,
                                                             "description": "FAQ as «Вопрос: …\\nОтвет: …» pairs or free text"
+                                                        },
+                                                        "professional_mode": {
+                                                            "type": "boolean"
+                                                        },
+                                                        "chunking_profile": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "version": {
+                                                                    "const": 1
+                                                                },
+                                                                "mode": {
+                                                                    "enum": [
+                                                                        "auto",
+                                                                        "headings",
+                                                                        "separator",
+                                                                        "blocks",
+                                                                        "records",
+                                                                        "table_rows",
+                                                                        "fixed",
+                                                                        "fixed_no_overlap",
+                                                                        "semantic"
+                                                                    ]
+                                                                },
+                                                                "heading_levels": {
+                                                                    "type": "array",
+                                                                    "maxItems": 3,
+                                                                    "items": {
+                                                                        "enum": [
+                                                                            1,
+                                                                            2,
+                                                                            3
+                                                                        ]
+                                                                    }
+                                                                },
+                                                                "separator": {
+                                                                    "type": "string",
+                                                                    "maxLength": 200
+                                                                },
+                                                                "max_chunk_size": {
+                                                                    "type": "integer",
+                                                                    "minimum": 100,
+                                                                    "maximum": 12000
+                                                                },
+                                                                "size_unit": {
+                                                                    "enum": [
+                                                                        "chars",
+                                                                        "tokens"
+                                                                    ]
+                                                                },
+                                                                "overlap": {
+                                                                    "type": "integer",
+                                                                    "minimum": 0,
+                                                                    "maximum": 11999
+                                                                },
+                                                                "strip_boilerplate": {
+                                                                    "type": "array",
+                                                                    "maxItems": 80,
+                                                                    "items": {
+                                                                        "type": "string",
+                                                                        "maxLength": 500
+                                                                    }
+                                                                },
+                                                                "metadata_lines": {
+                                                                    "type": "boolean"
+                                                                },
+                                                                "language": {
+                                                                    "enum": [
+                                                                        "auto",
+                                                                        "ru",
+                                                                        "en",
+                                                                        "uk"
+                                                                    ]
+                                                                },
+                                                                "title_columns": {
+                                                                    "type": "array",
+                                                                    "maxItems": 40,
+                                                                    "items": {
+                                                                        "type": "string",
+                                                                        "maxLength": 100
+                                                                    }
+                                                                },
+                                                                "include_columns": {
+                                                                    "type": "array",
+                                                                    "maxItems": 100,
+                                                                    "items": {
+                                                                        "type": "string",
+                                                                        "maxLength": 100
+                                                                    }
+                                                                },
+                                                                "group_rows": {
+                                                                    "type": "integer",
+                                                                    "minimum": 1,
+                                                                    "maximum": 100
+                                                                },
+                                                                "record_boundary": {
+                                                                    "type": "string",
+                                                                    "maxLength": 200
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "version",
+                                                                "mode"
+                                                            ]
+                                                        },
+                                                        "retrieval_profile": {
+                                                            "enum": [
+                                                                "balanced",
+                                                                "catalog",
+                                                                "meaning"
+                                                            ]
+                                                        },
+                                                        "embedding_model": {
+                                                            "enum": [
+                                                                "bge-m3"
+                                                            ]
                                                         }
                                                     },
                                                     "required": [
@@ -321,6 +666,121 @@
                                                                 7,
                                                                 14,
                                                                 30
+                                                            ]
+                                                        },
+                                                        "professional_mode": {
+                                                            "type": "boolean"
+                                                        },
+                                                        "chunking_profile": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "version": {
+                                                                    "const": 1
+                                                                },
+                                                                "mode": {
+                                                                    "enum": [
+                                                                        "auto",
+                                                                        "headings",
+                                                                        "separator",
+                                                                        "blocks",
+                                                                        "records",
+                                                                        "table_rows",
+                                                                        "fixed",
+                                                                        "fixed_no_overlap",
+                                                                        "semantic"
+                                                                    ]
+                                                                },
+                                                                "heading_levels": {
+                                                                    "type": "array",
+                                                                    "maxItems": 3,
+                                                                    "items": {
+                                                                        "enum": [
+                                                                            1,
+                                                                            2,
+                                                                            3
+                                                                        ]
+                                                                    }
+                                                                },
+                                                                "separator": {
+                                                                    "type": "string",
+                                                                    "maxLength": 200
+                                                                },
+                                                                "max_chunk_size": {
+                                                                    "type": "integer",
+                                                                    "minimum": 100,
+                                                                    "maximum": 12000
+                                                                },
+                                                                "size_unit": {
+                                                                    "enum": [
+                                                                        "chars",
+                                                                        "tokens"
+                                                                    ]
+                                                                },
+                                                                "overlap": {
+                                                                    "type": "integer",
+                                                                    "minimum": 0,
+                                                                    "maximum": 11999
+                                                                },
+                                                                "strip_boilerplate": {
+                                                                    "type": "array",
+                                                                    "maxItems": 80,
+                                                                    "items": {
+                                                                        "type": "string",
+                                                                        "maxLength": 500
+                                                                    }
+                                                                },
+                                                                "metadata_lines": {
+                                                                    "type": "boolean"
+                                                                },
+                                                                "language": {
+                                                                    "enum": [
+                                                                        "auto",
+                                                                        "ru",
+                                                                        "en",
+                                                                        "uk"
+                                                                    ]
+                                                                },
+                                                                "title_columns": {
+                                                                    "type": "array",
+                                                                    "maxItems": 40,
+                                                                    "items": {
+                                                                        "type": "string",
+                                                                        "maxLength": 100
+                                                                    }
+                                                                },
+                                                                "include_columns": {
+                                                                    "type": "array",
+                                                                    "maxItems": 100,
+                                                                    "items": {
+                                                                        "type": "string",
+                                                                        "maxLength": 100
+                                                                    }
+                                                                },
+                                                                "group_rows": {
+                                                                    "type": "integer",
+                                                                    "minimum": 1,
+                                                                    "maximum": 100
+                                                                },
+                                                                "record_boundary": {
+                                                                    "type": "string",
+                                                                    "maxLength": 200
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "version",
+                                                                "mode"
+                                                            ]
+                                                        },
+                                                        "retrieval_profile": {
+                                                            "enum": [
+                                                                "balanced",
+                                                                "catalog",
+                                                                "meaning"
+                                                            ]
+                                                        },
+                                                        "embedding_model": {
+                                                            "enum": [
+                                                                "bge-m3"
                                                             ]
                                                         }
                                                     },
@@ -369,6 +829,13 @@
                                                 "enum": [
                                                     "kb_only",
                                                     "kb_general"
+                                                ]
+                                            },
+                                            "retrieval_profile": {
+                                                "enum": [
+                                                    "balanced",
+                                                    "catalog",
+                                                    "meaning"
                                                 ]
                                             },
                                             "languages": {
@@ -1166,6 +1633,48 @@
                                 },
                                 "required": [
                                     "name"
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "type": "object",
+                        "required": [
+                            "kind",
+                            "ref",
+                            "data"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                            "kind": {
+                                "const": "relay_project"
+                            },
+                            "ref": {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9_.-]{1,40}$"
+                            },
+                            "data": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 120,
+                                        "description": "project display name"
+                                    },
+                                    "origins": {
+                                        "type": "array",
+                                        "minItems": 1,
+                                        "maxItems": 30,
+                                        "items": {
+                                            "type": "string",
+                                            "pattern": "^https://[^/]+$",
+                                            "description": "Exact HTTPS origin; no path, credentials, wildcard or trailing slash"
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "name",
+                                    "origins"
                                 ]
                             }
                         }
