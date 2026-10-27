@@ -224,7 +224,7 @@ Body: `{"values":"object","name":"string"}`
 
 ## Шаблоны шагов
 
-Черновики приватны для tenant. template_submit принимает scope tenant (default, только эта компания) или public (все клиенты); оба scope проходят AI-модерацию. Для public после явного подтверждения владельца нужен отдельный propose/apply с повторной проверкой сохранённой версии и блок-листа. Версии задач закреплены точными id и hash.
+Черновики приватны для tenant. template_submit принимает scope tenant (default, только эта компания) или public (все клиенты); tenant проходит детерминированную проверку, public дополнительно проходит проверку блок-листа и AI-модерацию. Для public после явного подтверждения владельца нужен отдельный propose/apply с повторной проверкой сохранённой версии и блок-листа. Версии задач закреплены точными id и hash.
 
 ### `GET /step-templates`
 
@@ -262,7 +262,7 @@ Body: `{"inputs":"object","where":"string","worker_id":"integer","node_id":"inte
 
 ### `POST /step-templates/{slug}/submit`
 
-Детерминированные проверки, блок-лист и обязательная AI-модерация; scope tenant по умолчанию или public
+tenant: детерминированные проверки; public: также блок-лист и AI-модерация, перед публикацией нужен отдельный owner-confirmed propose/apply
 - `slug` (path, required)
 
 Body: `{"scope":"string"}`
