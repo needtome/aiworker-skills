@@ -1274,7 +1274,7 @@
                                     },
                                     "program": {
                                         "type": "object",
-                                        "description": "optional scenario: {start_url?, steps:[{op, …}]}; ops: use, collection_algorithm, goto, back, reload, check_auth, page_state, dismiss, click, click_text, type, set_value, clear, select, check, press, hover, mouse, scroll, wait, wait_until, get, extract, extract_list, feed, fetch, api, tgstat, telemetr, apify, json_list, storage_get, open_tab, close_tab, download, upload, screenshot, tg_join, tg_fetch, tg_search, tg_send, tg_discover, add_target, audience_fetch, youtube, for_each, if, repeat, break, try, call, jump, pause, stop, set, calc, regex, date, match, filter, dedupe, push, keep, decide, ai, save, notify, agent, persona_audit. Account values use {{account.NAME}}; profile values use {{company.name}}, {{company.site}}, {{company.email}}, {{owner.name}}; API keys remain {{secret.NAME}}. Without a program the AI writes it.",
+                                        "description": "optional scenario: {start_url?, steps:[{op, …}]}; ops: use, collection_algorithm, goto, back, reload, check_auth, page_state, dismiss, click, click_text, type, set_value, clear, select, check, press, hover, mouse, scroll, wait, wait_until, get, extract, extract_list, feed, fetch, api, tgstat, telemetr, apify, json_list, storage_get, open_tab, close_tab, download, upload, screenshot, tg_join, tg_fetch, tg_search, tg_send, tg_discover, add_target, audience_fetch, youtube, for_each, if, repeat, break, try, call, jump, pause, stop, set, calc, regex, date, match, filter, dedupe, push, keep, decide, ai, save, notify, agent, persona_audit, demo_chat. Account values use {{account.NAME}}; profile values use {{company.name}}, {{company.site}}, {{company.email}}, {{owner.name}}; API keys remain {{secret.NAME}}. Without a program the AI writes it.",
                                         "properties": {
                                             "start_url": {
                                                 "type": "string"
@@ -1357,7 +1357,8 @@
                                                                 "save",
                                                                 "notify",
                                                                 "agent",
-                                                                "persona_audit"
+                                                                "persona_audit",
+                                                                "demo_chat"
                                                             ]
                                                         }
                                                     }
