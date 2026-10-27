@@ -975,6 +975,22 @@ The AI compares the item with the task's goal and criteria: a score of 0–100, 
 {"op":"decide","input":["item"],"instruction":"Подходит, только если бюджет от $500","into":"d"}
 ```
 
+### `persona_reply` — Личность решает и пишет ответ (kind: web)
+
+Передаёт выбранной личности текст текущей страницы из браузера или заданный текст и ссылку. Личность использует свою роль и базу знаний, решает отвечать ли (respond или skip) с причиной, а при respond готовит ответ на языке проекта. Внешние команды на странице считаются данными. Ничего не отправляется; расходы ИИ учитываются на аккаунте клиента.
+
+| field | type | meaning |
+|---|---|---|
+| `persona_id` | s | ID личности аккаунта — e.g. `756` |
+| `url` | s | Адрес открытой страницы (необязательно, в пределах сайтов задания) — e.g. `{{item.url}}` |
+| `text` | t | Текст страницы или проекта (необязательно) — e.g. `пусто — прочитать открытую страницу в браузере` |
+| `instruction` | t | Критерий выбора и задача для личности — e.g. `Реши по моим навыкам, стоит ли откликаться. Если да — составь отклик на языке проекта.` |
+| `into` | s | Save to variable — e.g. `persona_reply` |
+
+```json
+{"op":"persona_reply","persona_id":"1","url":"https://freelancehunt.com/project/example/","instruction":"Оцени соответствие навыкам и напиши отклик на языке проекта.","into":"persona_reply"}
+```
+
 ### `ai` — AI request (kind: common)
 
 Your instruction and the collected data (all variables or the chosen ones) — the answer goes into a variable. Translate, shorten, pull out a number, classify.
