@@ -444,7 +444,7 @@ Body: `{"text":"string","chat_id":"integer"}`, required: text
 
 Поставить в очередь изображение для записи WordPress
 
-Модерация выполняется до постановки. Лимиты: 20 заданий в сутки и 6 на post_id. Токены списываются только после успешной генерации. 1.91:1 возвращается как 1200×630. Повторите тот же idempotency_key в течение 24 часов, чтобы получить то же задание.
+Предварительной модерации нет: запрещённый контент отклоняет сам генератор, тогда задание завершается status=failed и error.code=content_refused. Если у аккаунта подключён свой Codex, генерация идёт через его подписку и quote.tokens=0; иначе — через Codex платформы или OpenAI API с оплатой токенами аккаунта. Лимиты: 20 заданий в сутки и 6 на post_id. Токены списываются только после успешной генерации. 1.91:1 возвращается как 1200×630. Повторите тот же idempotency_key в течение 24 часов, чтобы получить то же задание.
 
 Body: `{"brief":"string","post_title":"string","post_excerpt":"string","post_id":"integer","purpose":"string","aspect":"string","quality":"string","format":"string","lang":"string","idempotency_key":"string"}`, required: brief, idempotency_key
 
