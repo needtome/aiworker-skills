@@ -60,6 +60,35 @@ confirms the live checklist, the original draft templates #30/#31 can be archive
 `cd laravel && php artisan automation:archive-freelancehunt-drafts --live-validated`; this command preserves both rows
 and their versions and has not been run by the DEV implementation.
 
+## freelancermap application template (`fm_apply`, ADR-288)
+
+`fm_apply` is a platform web template for `freelancermap.com`. It runs in the AI employee's server browser by default
+(`server`; `client_browser` is also allowed), because that is where the freelancermap login lives. It takes `project_url`
+(`https://www.freelancermap.com/project/<slug>`), approved `text` (up to 4000 characters), `mode` (`fill_only` by default,
+or `submit`), `send_email` and `send_phone` (`yes` by default, or `no`) and an optional `already_applied_pattern` (the
+site's «already applied» wording as a regular expression; English and German defaults). It stops with an error on a
+browser check, a logged-out browser or «Applications remaining this month: 0/N», and with `ok` on an earlier application
+or a closed project. freelancermap shows two forms: its own (a required «Message» box, optional attachments, the contact
+checkboxes) and an agency's embedded form (resume upload, name, phone, salary…). The agency form is never filled: the
+template stops `ok` with «форма агентства: отклик нужно отправить вручную». On its own form it types the text, reads it
+back, sets the two checkboxes and, for `submit`, clicks «Send application» with `submit:true`, the task's permit and
+pacing, and a site confirmation (no confirmation within 20 s is `uncertain`). freelancermap has no working RSS feed; the
+list reader `freelancermap_new_projects` collects title, url, card text, client, location, remote share, contract type,
+start and publication time from one list page.
+
+```json
+{
+  "start_url":"https://www.freelancermap.com/",
+  "steps":[{"op":"for_each","list":"events","as":"item","limit":20,"steps":[
+    {"op":"goto","url":"{{item.url}}","where":"server"},
+    {"op":"persona_reply","persona_id":"756","url":"{{item.url}}","instruction":"…","into":"d","where":"server"},
+    {"op":"if","cond":{"var":"d.decision","eq":"respond"},"then":[{"op":"call","name":"respond"}],"else":[{"op":"save"}]}
+  ]}],
+  "procedures":{"respond":[{"op":"use","template":"fm_apply","where":"server",
+    "params":{"project_url":"{{item.url}}","text":"{{d.reply}}","mode":"submit"}}]}
+}
+```
+
 ## Step templates
 
 ### `use` — Step template (kind: common)
