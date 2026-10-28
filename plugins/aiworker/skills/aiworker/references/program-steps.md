@@ -186,12 +186,13 @@ Types like a person: at its own speed, line breaks with Shift+Enter (suits messe
 
 ### `set_value` — Set a field value (kind: web)
 
-Sets the value at once, without typing letter by letter, and tells the page about the change. For number fields, dates and hidden filters.
+Ставит значение сразу, без набора по буквам, и сообщает странице об изменении. Для числовых полей, дат и скрытых фильтров. paste — вставка через буфер обмена (Ctrl+V), как это делает человек: HTML сохраняет заголовки и жирный шрифт, весь видимый текст сверяется после вставки.
 
 | field | type | meaning |
 |---|---|---|
 | `selector` | sel | Селектор CSS/XPath или semantic-привязка к подписи, placeholder, aria-label, кнопке или роли — e.g. `.card a или {"by":"label","any":["Цена","Price"]}` |
 | `value` | s | Value — e.g. `{{dwt_from}}` |
+| `paste` | b | Вставить через буфер обмена (с форматированием) |
 
 ```json
 {"op":"set_value","selector":"input[name=dwt_from]","value":"5000"}
