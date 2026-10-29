@@ -768,7 +768,14 @@ A route has an agent (`claude` | `codex`), a session mode and the owner's instru
 route orders": check the key is set without printing it (`[ -n "$AIWORKER_API_KEY" ] && echo set`), then start with the
 **Monitor** tool:
 `node "<this skill's directory>/scripts/aiworker-listen.mjs" --route orders --mode live`.
-Each stdout line is one event («AI Worker event #id for route orders: … ; instruction: …»); stderr is status only. For each
+At startup the listener prints delivered-but-unacknowledged events held by this listener or whose 20-minute lease expired,
+oldest first, then follows new events. Its stable id is stored in `~/.config/aiworker/listener-<route>.id`; if that
+directory is not writable it uses a random id for this process. Use one listener process per route on each machine. A
+different listener cannot take an event while its lease is live, and a restarted listener with the same id can resume it.
+Each stdout line is one event («AI Worker event #id for route orders: … ; instruction: …»); stderr is status only. It marks
+an event delivered and starts its lease only after stdout accepts the complete line. In `run` mode the listener renews
+the lease every five minutes until it acknowledges the event; in `live` mode it does not renew, so an unacknowledged
+event becomes available after 20 minutes. After five delivery attempts the server marks it failed and alerts the admin. For each
 line: get the whole event if you need it (`agent_events` with `event_id`), do what the instruction says, then call
 `agent_ack` with `event_id`, `status` (`done` / `failed`) and a short `result`. Codex has no Monitor: use the background mode.
 
@@ -799,10 +806,11 @@ prompt goes on stdin), takes the exit code and the last lines of the output and 
      "\"C:\Program Files\nodejs\node.exe\" \"%USERPROFILE%\.aiworker\aiworker-listen.mjs\" --route orders --mode run --key-file
      \"%USERPROFILE%\.aiworker\key\""`, then `schtasks /Run /TN "AI Worker listener orders"`. (Or a shortcut in
      `shell:startup`.) The key file: `[IO.File]::WriteAllText("$HOME\.aiworker\key", $env:AIWORKER_API_KEY)`.
-6. Check it: the panel's «ИИ-агенты» shows the next event as «передано агенту», then «обработано» with the result.
+6. Check it: the panel's «ИИ-агенты» shows the event as «передано агенту», then «обработано» with the result.
 
 **Never resume a session that is open in an app at the same time** — two processes in one session break each other; for
-the background, use a separate session or `new`. Several listeners of one route never get the same event.
+the background, use a separate session or `new`. Keep one listener process per route on each machine; use another
+machine only when it should have a different listener identity.
 
 ## Account alerts (ADR 109)
 

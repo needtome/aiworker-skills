@@ -77,7 +77,7 @@ Body: `{"text":"string","task_id":"integer"}`, required: text
 
 Предложить изменения: создать задание, чат, сбор контактов; изменить задание, FAQ, приветствие, инструкции; запустить, поставить на паузу… Ничего не меняется до /changes/apply
 
-Действия — тот же закрытый список, что у мастера (GET /guide). Поля действия: type, target (id объекта; 0 — новый), field, lang, value, question, answer, index, payload (JSON-строка для automation_* и audience_collect). automation_create и automation_update принимают max_actions_per_day (0–10000, календарный день в часовом поясе аккаунта), min_interval_minutes (0–40320), event_max_age_minutes (0–40320; 0 отключает устаревание), event_overflow (keep_newest|keep_oldest, по умолчанию keep_oldest), max_queued_events (1–500), events_per_run (1–50), warmup_enabled, warmup_days (1–60), warmup_start_per_day, warmup_started_at (YYYY-MM-DD) и interval_jitter_percent (0–50). При прогреве max_actions_per_day — цель, стартовая квота по умолчанию max(1, round(target/8)), дата старта сохраняется при смене цели, день 0 начинается с неё; task_status возвращает pacing_status и полный план. Прогрев требует цели от 1 до 10000; jitter добавляет к паузе случайное время от 0 до указанного процента и не сокращает минимум. Лимиты применяются сервером перед каждым внешним действием. События старше срока помечаются skipped с reason=expired, а переполненные события — с reason=overflow; действия, остановленные дневным лимитом или минимальной паузой, и их события откладываются до ближайшего разрешённого времени и повторно оцениваются, если не истекут. Ответ: что будет изменено (pending) и что отклонено с причиной (refused).
+Действия — тот же закрытый список, что у мастера (GET /guide). Поля действия: type, target (id объекта; 0 — новый), field, lang, value, question, answer, index, payload (JSON-строка для automation_* и audience_collect), find и replace (точная замена одного фрагмента persona_instruction_edit). automation_create и automation_update принимают max_actions_per_day (0–10000, календарный день в часовом поясе аккаунта), min_interval_minutes (0–40320), event_max_age_minutes (0–40320; 0 отключает устаревание), event_overflow (keep_newest|keep_oldest, по умолчанию keep_oldest), max_queued_events (1–500), events_per_run (1–50), warmup_enabled, warmup_days (1–60), warmup_start_per_day, warmup_started_at (YYYY-MM-DD) и interval_jitter_percent (0–50). При прогреве max_actions_per_day — цель, стартовая квота по умолчанию max(1, round(target/8)), дата старта сохраняется при смене цели, день 0 начинается с неё; task_status возвращает pacing_status и полный план. Прогрев требует цели от 1 до 10000; jitter добавляет к паузе случайное время от 0 до указанного процента и не сокращает минимум. Лимиты применяются сервером перед каждым внешним действием. События старше срока помечаются skipped с reason=expired, а переполненные события — с reason=overflow; действия, остановленные дневным лимитом или минимальной паузой, и их события откладываются до ближайшего разрешённого времени и повторно оцениваются, если не истекут. Ответ: что будет изменено (pending) и что отклонено с причиной (refused).
 
 Body: `{"actions":"array"}`, required: actions
 
@@ -478,6 +478,9 @@ Body: `{"brief":"string","post_title":"string","post_excerpt":"string","post_id"
 - `route` (query) — имя маршрута; без него — все активные
 - `after` (query) — только события с id больше
 - `limit` (query)
+- `backlog` (query)
+- `confirm` (query)
+- `listener` (query) — стабильный id слушателя; обязателен с confirm=1
 
 ### `POST /agent/events`
 
@@ -497,12 +500,26 @@ Body: `{"route":"string","title":"string","payload":"object"}`, required: route,
 Одно событие с данными и промптом
 - `id` (path, required)
 
+### `POST /agent/events/{id}/presented`
+
+Подтвердить показ события и взять lease на 20 минут
+- `id` (path, required)
+
+Body: `{"listener":"string"}`
+
+### `POST /agent/events/{id}/lease`
+
+Продлить lease события ещё на 20 минут
+- `id` (path, required)
+
+Body: `{"listener":"string"}`, required: listener
+
 ### `POST /agent/events/{id}/ack`
 
 Отметить событие: обработано или нет, и что сделано
 - `id` (path, required)
 
-Body: `{"status":"string","result":"string"}`, required: status
+Body: `{"status":"string","result":"string","listener":"string"}`, required: status
 
 ## Генерация изображений Codex
 

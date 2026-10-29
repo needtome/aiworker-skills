@@ -7,15 +7,46 @@
  *   node aiworker-listen.mjs --route orders --mode run    runs the route's agent headless for each event and reports back
  *
  * The key comes from AIWORKER_API_KEY or --key-file (never from the command line, never printed). Node 18+, no dependencies.
+ * On start it resumes its own delivered-but-unacknowledged events or those with expired leases, oldest first, then follows
+ * new events. It prints each line before recording ownership; run mode renews the lease while the agent works, up to five attempts.
  * It waits on the route's wake-up signal (a long-poll on the AI Worker OMS: only «there is an event», no content) and fetches
  * the events themselves with the key; without the signal it asks every 5 seconds.
  */
-import { readFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { randomUUID as nodeRandomUUID } from "node:crypto";
 import { spawn as nodeSpawn } from "node:child_process";
+import { homedir } from "node:os";
+import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 
 export const DEFAULT_BASE = "https://kra.name/app/api/v1";
-const POLL_MS = 5000, WAKE_TIMEOUT_MS = 60000, LINE_DATA = 2000, RESULT_MAX = 4000;
+const POLL_MS = 5000, WAKE_TIMEOUT_MS = 60000, LEASE_RENEW_MS = 5 * 60 * 1000, LINE_DATA = 2000, RESULT_MAX = 4000;
+
+/** Persist a listener identity for this route when the user's config directory is writable. */
+export function listenerIdFor(route, options = {}) {
+  const fs = options.fs || { mkdirSync, readFileSync, writeFileSync }, makeId = options.randomUUID || nodeRandomUUID;
+  const fallback = () => makeId();
+  if (!/^[A-Za-z0-9_-]{1,60}$/.test(`${route || ""}`)) return fallback();
+  const file = join(options.home || homedir(), ".config", "aiworker", `listener-${route}.id`);
+  try {
+    fs.mkdirSync(join(options.home || homedir(), ".config", "aiworker"), { recursive: true, mode: 0o700 });
+    let exists = false, saved = "";
+    try { saved = fs.readFileSync(file, "utf8").trim(); exists = true; }
+    catch (e) { if (e.code !== "ENOENT") return fallback(); }
+    if (saved && saved.length <= 64) return saved;
+    const id = makeId();
+    try {
+      fs.writeFileSync(file, id, { encoding: "utf8", mode: 0o600, flag: exists ? "w" : "wx" });
+      return id;
+    } catch (e) {
+      if (e.code === "EEXIST") {
+        const winner = fs.readFileSync(file, "utf8").trim();
+        if (winner && winner.length <= 64) return winner;
+      }
+      return fallback();
+    }
+  } catch { return fallback(); }
+}
 
 export function parseArgs(argv) {
   const o = { mode: "live", agentArgs: [], once: false, timeoutMin: 30 };
@@ -71,17 +102,47 @@ export async function main(argv, deps = {}) {
     const r = await fetchFn(base + path, { ...init, headers: { Accept: "application/json", "Content-Type": "application/json", Authorization: `Bearer ${key}`, ...(init.headers || {}) } });
     let body = null; try { body = await r.json(); } catch { body = null; }
     if (r.status === 401 || r.status === 403) { const e = new Error(r.status === 401 ? "the API key is not accepted" : `the account has no API (${body?.error || "plan"})`); e.fatal = true; throw e; }
-    if (!r.ok) throw new Error(`HTTP ${r.status}${body?.error ? `: ${body.error}` : ""}`);
+    if (!r.ok) { const e = new Error(`HTTP ${r.status}${body?.error ? `: ${body.error}` : ""}`); e.status = r.status; throw e; }
     return body;
   };
-  const ack = (id, status, result) => api(`/agent/events/${id}/ack`, { method: "POST", body: JSON.stringify({ status, result: tail(result) }) });
+  const ack = (id, status, result) => api(`/agent/events/${id}/ack`, { method: "POST", body: JSON.stringify({ status, result: tail(result), listener: listenerId }) });
 
   let route;
   try {
     route = ((await api("/agent/routes")).data || []).find((r) => r.name === o.route || `${r.id}` === o.route);
     if (!route) { say(`route «${o.route}» is not in this account (panel → AI agents)`); return 2; }
   } catch (e) { say(e.message); return 2; }
-  say(`route ${route.name} (${route.target}, ${route.session_mode}${route.status === "paused" ? ", paused" : ""}), mode ${o.mode}; waiting for events${route.wake ? "" : " (asking every 5 s)"}`);
+  const listenerId = listenerIdFor(route.name, deps.listenerOptions);
+
+  const writeLine = (line) => new Promise((resolve, reject) => {
+    let settled = false;
+    const finish = (error) => { if (settled) return; settled = true; error ? reject(error) : resolve(); };
+    try {
+      if (out.write.length > 1) out.write(line, finish);
+      else { out.write(line); finish(); }
+    } catch (e) { finish(e); }
+  });
+  const present = (id) => api(`/agent/events/${id}/presented`, { method: "POST", body: JSON.stringify({ listener: listenerId }) });
+  const renewLease = (id) => api(`/agent/events/${id}/lease`, { method: "POST", body: JSON.stringify({ listener: listenerId }) });
+  const startLeaseRenewal = (id) => {
+    const setEvery = deps.setInterval || setInterval, clearEvery = deps.clearInterval || clearInterval;
+    let active = true, pending = null;
+    const timer = setEvery(() => {
+      if (!active || pending) return;
+      pending = renewLease(id).catch((e) => say(`lease #${id}: ${e.message}`)).finally(() => { pending = null; });
+    }, deps.leaseIntervalMs || LEASE_RENEW_MS);
+    return async () => { active = false; clearEvery(timer); if (pending) await pending; };
+  };
+  const ackUntilSettled = async (id, status, result) => {
+    for (;;) {
+      try { await ack(id, status, result); return true; }
+      catch (e) {
+        if (e.fatal || [404, 409].includes(e.status)) { say(`ack #${id}: ${e.message}`); return false; }
+        say(`ack #${id}: ${e.message}; retrying in 5 s`);
+        await sleep(POLL_MS);
+      }
+    }
+  };
 
   const runAgent = (e) => new Promise((resolve) => {
     let cmd;
@@ -98,22 +159,46 @@ export async function main(argv, deps = {}) {
   });
 
   const handle = async (e) => {
-    if (o.mode === "live") { out.write(eventLine(e) + "\n"); return; }
+    try { await writeLine(eventLine(e) + "\n"); }
+    catch (x) { say(`stdout #${e.id}: ${x.message}`); throw x; }
+    try { await present(e.id); }
+    catch (x) { say(`presented #${e.id}: ${x.message}`); return; }
+    if (o.mode === "live") return;
     say(`event #${e.id}: running ${(e.agent || route).target}`);
-    const r = await runAgent(e);
-    await ack(e.id, r.code === 0 ? "done" : "failed", r.code === 0 ? r.text : `exit ${r.code}: ${r.text}`).catch((x) => say(`ack #${e.id}: ${x.message}`));
+    const stopRenewal = startLeaseRenewal(e.id);
+    let r;
+    try {
+      r = await runAgent(e);
+      await ackUntilSettled(e.id, r.code === 0 ? "done" : "failed", r.code === 0 ? r.text : `exit ${r.code}: ${r.text}`);
+    } finally { await stopRenewal(); }
     say(`event #${e.id}: ${r.code === 0 ? "done" : "failed (exit " + r.code + ")"}`);
   };
 
-  let after = 0;
+  let after = 0, backlogAfter = 0;
+  const drainBacklog = async () => {
+    for (let guard = 0; guard < 50; guard++) {
+      const res = await api(`/agent/events?route=${encodeURIComponent(route.name)}&backlog=1&confirm=1&listener=${encodeURIComponent(listenerId)}&after=${backlogAfter}`);
+      const list = res.events || [];
+      for (const e of list) { backlogAfter = Math.max(backlogAfter, e.id); await handle(e); }
+      if (list.length < 20) return;
+    }
+  };
   const drain = async () => {
     for (let guard = 0; guard < 50; guard++) {
-      const res = await api(`/agent/events?route=${encodeURIComponent(route.name)}&after=${after}`);
+      const res = await api(`/agent/events?route=${encodeURIComponent(route.name)}&confirm=1&listener=${encodeURIComponent(listenerId)}&after=${after}`);
       const list = res.events || [];
       for (const e of list) { after = Math.max(after, e.id); await handle(e); }
       if (list.length < 20) return;
     }
   };
+
+  try { await drainBacklog(); }
+  catch (x) {
+    if (x.fatal) { say(x.message); return 3; }
+    say(`backlog: ${x.message}`);
+    if (o.once) return 1;
+  }
+  say(`route ${route.name} (${route.target}, ${route.session_mode}${route.status === "paused" ? ", paused" : ""}), mode ${o.mode}; waiting for events${route.wake ? "" : " (asking every 5 s)"}`);
 
   /* the wake-up: one long-poll on the OMS with the route's own key; it answers with a short JSON on an event, «n»/«-1» otherwise */
   const wake = async () => {

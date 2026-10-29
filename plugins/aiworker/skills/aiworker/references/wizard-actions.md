@@ -6,6 +6,7 @@ on apply.
 
 - `persona_instruction_append` — Дополнить инструкцию личности
 - `persona_instruction_replace` — Заменить инструкцию личности
+- `persona_instruction_edit` — Точно заменить один фрагмент инструкции личности: target — id личности; find — точный фрагмент, который встречается ровно один раз; replace — новый текст фрагмента
 - `plan_recommend` — Рекомендовать один активный тариф ИИ-сотрудника: plan — код тарифа из context.worker_interview.plans, reason — короткая причина по ответам владельца; payload JSON {"period":"month|year"}; тариф не оплачивается автоматически
 - `persona_field` — Изменить имя, фамилию, пол или должность личности
 - `persona_create` — Создать личность (консультанта)
