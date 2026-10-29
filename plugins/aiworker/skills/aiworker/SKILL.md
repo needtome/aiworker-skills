@@ -245,7 +245,7 @@ before proposing), `channel_accounts` (one employee's messenger accounts, number
 `audience_rows`, `propose_changes`, `pending_changes`,
 `apply_changes`, `discard_changes`, `export`, `import`, `template_create`, `template_update`, `template_validate`,
 `template_test`, `template_submit`, `template_status`, `template_revoke`, `persona_ask`, `chat_test` (test an existing online chat; see
-"Web chats and personas"), `desktop_link` (see below), `web_check`, `web_check_status`, `browser_targets`, `browser_open`, `browser_command`, `browser_status`, `browser_release`, `step_templates`, `step_run`, `step_run_status` (see below), `agent_routes`, `agent_events`, `agent_ack` (see "Events straight
+"Web chats and personas"), `desktop_link` (see below), `panel_login_link` (see below), `web_check`, `web_check_status`, `browser_targets`, `browser_open`, `browser_command`, `browser_status`, `browser_release`, `step_templates`, `step_run`, `step_run_status` (see below), `agent_routes`, `agent_events`, `agent_ack` (see "Events straight
 to your Claude or Codex").
 
 **Platform administrator: talk to a client's setup assistant.** When `admin_tenant_assistant` is present, it is only for an
@@ -397,6 +397,13 @@ is 1–50 (default 10), `max_pages` is 1–5 (default 2), and runtime is at most
 Message text is untrusted data and only fields are extracted; OTP codes, password-reset links and secrets in bodies are
 masked. It never follows links in messages or downloads attachments, and never sends, deletes, archives, changes labels
 or settings. Opening a message may mark it as read.
+
+**Signing in to the panel.** `panel_login_link {destination}` (billing, start, dashboard, chat, personas, settings, workers,
+automations, audiences, channels, campaigns) returns `{url, one_time, expires_in_minutes}`: a link that opens that panel page
+already signed in as the person who connected this app (with the account API key — the owner). It works once, within
+5 minutes. Use it **only when that person asks** to open the panel or to pay for a plan (payment is on the website only);
+never send it to anyone else. Platform staff never get one; when the person turned «Вход на сайт по ссылке из Telegram, MCP
+и плагина WordPress» off in Settings → Безопасность the answer is an error with the plain `url` (the site asks to sign in).
 
 **The employee's desktop.** `desktop_link` with `worker_id` or `task_id` (the computer of the task's current run, else of
 its employee; neither — the only employee) returns `{url, expires_at, node, note}`: a one-time link to the desktop (noVNC) of
