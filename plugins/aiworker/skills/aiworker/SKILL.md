@@ -59,12 +59,17 @@ the old one — or use connected mode, which changes things in place.
 ## Connected mode (MCP)
 
 The account is an MCP server: `https://kra.name/app/api/mcp`, header `Authorization: Bearer <API key>` (panel →
-Настройки → Интеграции; MCP works on every paid plan, the REST API on Business and above). Setup:
+Настройки → Интеграции; MCP works on every paid plan and on a free account too, the REST API on Business and above).
+On a free account (no paid plan) MCP does what that account's panel wizard does — the online chat, its persona, FAQ and
+knowledge base; any other tool answers error «plan» with `plans_url` (AI employees, tasks and collections need an
+AI-employee plan), and platform AI work spends the account's free token allowance — once it is spent, results carry
+error «free_tokens» with `plans_url`; tell the owner and give the link. Setup:
 
 The owner can also link the shared AI Worker Telegram bot from panel → Настройки → Уведомления. The bot uses the
 same tenant-scoped setup assistant in its own Telegram session; it shows proposed changes before Apply or Cancel.
 `/status` reads a short account status, voice messages use the panel transcription service, and the bot menu opens the
-Telegram Mini App wizard. MCP and Telegram keep the same tenant boundary and proposal approval flow.
+Telegram Mini App wizard. MCP and Telegram keep the same tenant boundary and proposal approval flow. The bot works on a
+free account too, within its free tokens; when they are spent it says so with the plans link.
 
 This public skill connects to the client's own account only. Keep account changes within its tenant and use
 `propose_changes` → `apply_changes`; platform administration is outside this client skill.
