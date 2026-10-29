@@ -40,7 +40,7 @@ on apply.
 - `worker_identity` — Сгенерировать и назначить новую личность ИИ-сотруднику: target — id сотрудника; старая личность остаётся в аккаунте
 - `tenant_storage` — Изменить место хранения файлов аккаунта: payload — JSON {"mode":"off|files|core_data","node_id":ID|null,"region_label":"…"}; узел должен быть подключённым BYOS-узлом этой компании
 - `invite` — Пригласить коллегу в аккаунт: payload — JSON {"name":"…","email":"…","role":"owner|manager|moderator"}; письмо отправится после apply_changes
-- `notification_preferences` — Изменить настройки уведомлений: field user с payload {"prefs":{"tg_draft":true,…}} (неуказанные переключатели сохраняют прежнее значение) или field webhook с payload {"url":"https://…","events":[…]}; URL вебхука никогда не возвращается
+- `notification_preferences` — Изменить настройки уведомлений: field user с payload {"prefs":{"tg_draft":true,…}} меняет общее событие для выбранных каналов (неуказанные переключатели сохраняются); assistant_usage и panel_* остаются личными. Field webhook меняет подписанный вебхук событий; URL вебхука никогда не возвращается
 - `notification_test` — Отправить тестовое событие на уже настроенный webhook аккаунта; target не нужен, URL и ответное тело не возвращаются
 - `brand_style_set` — Сохранить стиль бренда компании: payload — JSON с description, colors, fonts, logo_url, tone, signature, legal_footers, button_style и do_dont
 - `brand_style_detect_from_site` — Определить стиль бренда по публичному сайту после подтверждения владельца, сохранить новой ревизией и показать найденные значения; target — id ИИ-сотрудника, payload — JSON {"url":"https://…","designer_role":"mailing_designer|deck_designer|ui_web_designer"}; генерация не запускается
