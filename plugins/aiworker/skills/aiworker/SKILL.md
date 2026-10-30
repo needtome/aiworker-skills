@@ -521,8 +521,8 @@ company contacts (phones, e-mails, messengers from public sites) or Telegram cha
 - **Topic check of Telegram rows.** A group or channel is checked by its own data (title, the description of its t.me
   page, kind), not by the page where its link was found; only checked rows are «подходящие», and the summary names the
   unchecked and the refused apart. The log counts new rows, updated rows, repeats and refused ones separately.
-- **New job.** Action `audience_collect` with payload `{"name","query","geo","limit","target":"companies|telegram|communities|listings|youtube"}` and,
-  like the panel form, optional `schedule` (`once|daily|weekly`), `min_contacts` (keep collecting in new rounds up to N),
+- **New job.** Action `audience_collect` with payload `{"name","query","geo","limit","target":"companies|telegram|communities|listings|youtube"}`; web collections also accept `exclude_tlds` (e.g. `["ru","su","by"]`), `exclude_domains` and `search_plan: {"languages":["uk","ru","en"],"regions":["Украина"]}` for multilingual regional searches. The node receives these values in the job config and rejects matching candidates at intake. It also accepts
+  It also accepts, like the panel form, optional `schedule` (`once|daily|weekly`), `min_contacts` (keep collecting in new rounds up to N),
   `check_messengers`, `depth` (1-5 pages per site), `mode` (`ai|deterministic`). It is within the plan's monthly limit:
   `limit` and `min_contacts` are cut to what is left, and with nothing left the action is refused. Collection needs no
   payment. Two steps as always: `propose_changes`, the owner agrees, `apply_changes`.
