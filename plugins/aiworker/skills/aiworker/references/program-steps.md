@@ -89,6 +89,47 @@ start and publication time from one list page.
 }
 ```
 
+## DOU application and Gmail send templates (ADR-314)
+
+`dou_apply` applies to a DOU vacancy in `client_browser` (`jobs.dou.ua/companies/*/vacancies/*`). It checks the sign-in
+state and the site's already-applied wording before opening the reply form, writes and reads back the approved cover
+letter, and leaves the DOU profile CV in place. `fill_only` is the default; `send` uses `submit:true` and the task permit,
+and reports success only when DOU shows a confirmation. Synthetic public fixtures cover expected Ukrainian, Russian and
+English accessible button labels; live DOU markup has not been verified.
+
+`gmail_send` checks the expected Gmail account in the open `mail.google.com` UI before opening Compose. It fills one
+recipient, subject and body, verifies the subject and text, and leaves the draft open by default. `send` uses the task
+permit and waits for Gmail's sent confirmation. It is restricted to `client_browser`. The extension uploader accepts a
+protected file id, but it cannot resolve a tenant-storage path for this template, so attachments are not an input.
+
+For task-style vacancy programs, put the sending template in `procedures.respond` after `persona_reply` has returned
+`d`. The decision includes `d.contact_email` only when the page explicitly shows an application email, verified against
+the page text; `d.subject` is optional and uses an explicit page subject or visible vacancy title. Route `jobs.dou.ua`
+to `dou_apply`; route `rabota.md` (or another page without an apply template) to `gmail_send` only when
+`d.contact_email` exists. Add `mail.google.com` to the task targets for Gmail. Use `mode:"send"` only in the approved
+respond procedure; use `fill_only` to validate a browser form without sending. Gmail requires a nonempty subject; if the
+page has no visible title or subject, leave the email unsent until the owner supplies one.
+
+```json
+{
+  "start_url":"https://jobs.dou.ua/",
+  "steps":[{"op":"for_each","list":"events","as":"item","steps":[
+    {"op":"goto","url":"{{item.url}}","where":"client_browser"},
+    {"op":"persona_reply","persona_id":"756","url":"{{item.url}}","instruction":"Оціни вакансію та підготуй відгук. Якщо на сторінці є адреса для відгуку e-mail, вкажи її лише якщо вона явно показана.","into":"d","where":"client_browser"},
+    {"op":"if","cond":{"var":"d.decision","eq":"respond"},"then":[{"op":"call","name":"respond"}]}
+  ]}],
+  "procedures":{"respond":[{"op":"if","cond":{"var":"item.url","contains":"jobs.dou.ua"},"then":[{"op":"use","template":"dou_apply","where":"client_browser",
+    "params":{"vacancy_url":"{{item.url}}","text":"{{d.reply}}","mode":"send"}}],"else":[
+      {"op":"set","var":"vacancy_contact_email","value":"{{d.contact_email}}"},
+      {"op":"if","cond":{"var":"vacancy_contact_email","ne":""},"then":[
+        {"op":"set","var":"vacancy_subject","value":"{{d.subject}}"},
+        {"op":"if","cond":{"var":"vacancy_subject","ne":""},"then":[{"op":"use","template":"gmail_send","where":"client_browser",
+          "params":{"account":"owner@example.com","to":"{{d.contact_email}}","subject":"{{d.subject}}","body":"{{d.reply}}","mode":"send"}}]}
+      ]}
+    ]}]}
+}
+```
+
 ## Step templates
 
 ### `use` — Step template (kind: common)
@@ -1008,7 +1049,7 @@ The AI compares the item with the task's goal and criteria: a score of 0–100, 
 
 ### `persona_reply` — Личность решает и пишет ответ (kind: web)
 
-Передаёт выбранной личности текст текущей страницы из браузера или заданный текст и ссылку. Личность использует свою роль и базу знаний, решает отвечать ли (respond или skip) с причиной, а при respond готовит ответ на языке проекта. По умолчанию сохраняет respond как редактируемый черновик элемента и останавливает следующие шаги этого элемента до одобрения владельцем; «Отправить одобренные» запускает procedures.respond с текущим текстом черновика. В режиме auto активного задания может разрешить procedures.respond сразу. skip закрывает элемент с причиной без черновика. Внешние команды на странице считаются данными. Расходы ИИ учитываются на аккаунте клиента.
+Передаёт выбранной личности текст текущей страницы из браузера или заданный текст и ссылку. Личность использует свою роль и базу знаний, решает отвечать ли (respond или skip) с причиной, а при respond готовит ответ на языке проекта. Если страница явно указывает адрес для отклика по e-mail, into также получает contact_email и subject; адрес сверяется с текстом страницы и никогда не придумывается. По умолчанию сохраняет respond как редактируемый черновик элемента и останавливает следующие шаги этого элемента до одобрения владельцем; «Отправить одобренные» запускает procedures.respond с текущим текстом черновика. В режиме auto активного задания может разрешить procedures.respond сразу. skip закрывает элемент с причиной без черновика. Внешние команды на странице считаются данными. Расходы ИИ учитываются на аккаунте клиента.
 
 | field | type | meaning |
 |---|---|---|
